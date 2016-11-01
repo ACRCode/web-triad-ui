@@ -1,0 +1,23 @@
+{
+    "name": "web-triad-ui-controls",
+    "description": "ui controls",
+    "main": [
+        "dist/uiControls/Css/tcStyle.css",
+        "dist/uiControls/Scripts/reviewControl.js"
+    ],
+    "authors": [
+        "acrsm"
+    ],
+    "dependencies": {
+        "web-triad-sdk-for-js": "0.0.13"
+    },
+    "license": "MIT",
+    "homepage": "https://github.com/acrscm/web-triad-ui",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "packages",
+        "web-triad-ui"
+    ]
+}

@@ -1,0 +1,16 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - WebTriad</title>
+</head>
+<body>
+
+    <ul class="nav navbar-nav">
+        <li>@Html.ActionLink("ReviewControl", "ReviewControl", "Default")</li>
+        <li>@Html.ActionLink("UploadControl", "UploadControl", "Default")</li>
+    </ul>
+    @RenderBody()
+</body>
+</html>

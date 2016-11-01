@@ -1,0 +1,71 @@
+﻿@{
+    ViewBag.Title = "UploadControl";
+}
+<script src="~/Scripts/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.min.js"></script>
+<script src="~/Content/uiControls/Scripts/webTriadService.js"></script>
+<script src="~/Content/uiControls/Scripts/dicomApi.js"></script>
+<script src="~/Content/uiControls/Scripts/uploadControl.js"></script>
+<link rel="stylesheet" href="~/Content/uiControls/Css/tcStyle.css">
+
+<button id="selectFiles" type="button" class="">
+    Select files
+</button>
+<input type="file" id="files" name="file" multiple="multiple" style="display: none">
+
+
+
+
+
+<div id="uploadControl" style="width: 80%; margin-top: 25px; margin-left: auto; margin-right: auto">
+
+
+
+</div>
+
+
+
+<script>
+
+
+    var uploadControl;
+
+    $(document).ready(function() {
+        $.ajaxSetup({
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("Authorization", "QUIC");
+            }
+        });
+
+        uploadControl = $("#uploadControl").uploaderFiles({
+            uploadData: [
+                { Name: "QualificationCode", Value: "QualificationCode1" },
+                { Name: "TimepointId", Value: "" },
+                { Name: "ExamId", Value: "" },
+                { Name: "FileGroup", Value: "FileGroup" },
+                { Name: "TypeOfSubmit", Value: 0 }
+            ],
+            setAvailabilityStatusAddingFiles: function(isAvailable) {
+                bb(isAvailable);
+            }
+        });
+
+        function bb(isAvailable) {
+            $("#selectFiles").prop("disabled", !isAvailable);
+        }
+
+        $("#selectFiles").click(function() {
+            $("#files").trigger("click");
+        });
+        $("#files").change(function(e) {
+            uploadControl.uploaderFiles("addFiles", e.target.files);
+        });
+    });
+</script>
+
+
+
+
+
+
+
