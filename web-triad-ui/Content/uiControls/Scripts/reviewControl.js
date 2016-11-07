@@ -7,7 +7,22 @@
                 numberOfFilesInPackage: 4,
                 sizeChunk: 1024 * 1024 * 2,
                 numberOfConnection: 6
+            },
+            getSecurityToken: function () {
+                console.log("getSecurityToken() not implemented");
+                return null;
             }
+        },
+
+        _securityToken: null,
+
+        _service: null,
+
+        setSecurityToken: function (token) {
+            if (token === null) return;
+            let self = this;
+            self._securityToken = token;
+            self._service.setSecurityToken(self._securityToken);
         },
 
         /////////////////////////////////////////////////////////////////////////
@@ -93,6 +108,12 @@
         _getStudiesDetailsDef: function () {
             let self = this;
             var deferred = $.Deferred();
+            /////////
+            /////////
+            /////////
+            var token = self.options.getSecurityToken();
+            self.setSecurityToken(token);
+
             self._service.getStudiesDetails(self.options.reviewData, callback);
 
             function callback(data) {
@@ -121,6 +142,13 @@
             let self = this;
             var deferred = $.Deferred();
             var params = [{ Name: "DicomDataStudyID", "Value": studyId }];
+
+            /////////
+            /////////
+            /////////
+            var token = self.options.getSecurityToken();
+            self.setSecurityToken(token);
+
             self._service.getSeriesDetails(params, callback);
 
 
@@ -177,6 +205,12 @@
 
                     var params = self.options.reviewData.concat(studyId);
 
+                    /////////
+                    /////////
+                    /////////
+                    var token = self.options.getSecurityToken();
+                    self.setSecurityToken(token);
+
                     self._service.openViewer(params, callback);
 
                     function callback(data) {
@@ -195,6 +229,12 @@
                 var that = $(this);
                 that.click(function () {
                     var studyId = that.closest("tr").attr("data-study-id");
+
+                    /////////
+                    /////////
+                    /////////
+                    var token = self.options.getSecurityToken();
+                    self.setSecurityToken(token);
 
                     self._service.deleteStudy(studyId, callback);
 
@@ -216,6 +256,13 @@
                 var that = $(this);
                 that.click(function () {
                     var seriesId = that.closest("tr").attr("data-series-id");
+
+                    /////////
+                    /////////
+                    /////////
+                    var token = self.options.getSecurityToken();
+                    self.setSecurityToken(token);
+
                     self._service.deleteSeries(seriesId, callback);
 
                     function callback(data) {

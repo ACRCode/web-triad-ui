@@ -5,13 +5,21 @@
             serviceParam: {
                 serverApiUrl: "http://localhost:57808/api",
                 numberOfFilesInPackage: 10,
-                sizeChunk: 1024 * 1024 * 2,
+                sizeChunk: 1024 * 1024,
                 numberOfConnection: 6
             },
             setAvailabilityStatusAddingFiles: function (isAvailable) {
                 console.log("AvailabilityStatusAddingFiles: " + isAvailable);
+            },
+            getSecurityToken: function () {
+                console.log("getSecurityToken() not implemented");
+                return null;
             }
         },
+
+        _service: null,
+
+        _securityToken: null,
 
         _studies: {},
 
@@ -22,6 +30,12 @@
         _dictionaryStateOfCollapse: {},
 
         /////////////////////////////////////////////////////////////////////////
+        setSecurityToken: function (token) {
+            if (token === null) return;
+            let self = this;
+            self._securityToken = token;
+            self._service.setSecurityToken(self._securityToken);
+        },
 
         _create: function () {
             this._studies = {};
@@ -313,6 +327,15 @@
                         Value: TypeOfSubmit.CreateSubmissionPackage
                     };
                     var data = self.options.uploadData.concat(typeSubmitData);
+
+                    /////////
+                    /////////
+                    /////////
+                    var token = self.options.getSecurityToken();
+                    self.setSecurityToken(token);
+
+
+
                     self._service.submitFiles(files, data, uploadHandler);
                 });
 
@@ -336,6 +359,13 @@
                         btn.removeClass("tc-not-allowed");
                     });
                     var listOfFilesId = trStudy.attr("data-listOfFilesId");
+
+                    /////////
+                    /////////
+                    /////////
+                    var token = self.options.getSecurityToken();
+                    self.setSecurityToken(token);
+
                     self._service.cancelUploadAndSubmitListOfFiles(listOfFilesId, uploadHandler);
                     trStudy.find(".tc-progress-uploading").hide();
                 });
