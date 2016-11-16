@@ -373,7 +373,7 @@ span.tc-delete-series {
     cursor: pointer;
 }
 
-span.not-allowed {
+.tc-not-allowed {
      cursor: not-allowed !important;
 }
 
