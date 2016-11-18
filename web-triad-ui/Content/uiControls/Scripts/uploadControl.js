@@ -14,12 +14,11 @@
             getSecurityToken: function () {
                 console.log("getSecurityToken() not implemented");
                 return null;
-            }
+            },
+            securityToken: null
         },
 
         _service: null,
-
-        _securityToken: null,
 
         _studies: {},
 
@@ -33,8 +32,8 @@
         setSecurityToken: function (token) {
             if (token === null) return;
             let self = this;
-            self._securityToken = token;
-            self._service.setSecurityToken(self._securityToken);
+            self.options.securityToken = token;
+            self._service.setSecurityToken(self.options.securityToken);
         },
 
         _create: function () {

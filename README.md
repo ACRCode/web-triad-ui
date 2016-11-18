@@ -34,12 +34,17 @@ Include jQuery, jQueryUI scripts and following files on the page
 <script src="~/*your folder*/uiControls/Scripts/reviewControl.js"></script>
 <link rel="stylesheet" href="~/*your folder*/uiControls/Css/tcStyle.css">
 ```
+
 Create ui-control for any jquery element and assign the necessary business parameters
-to *reviewData* variable.
+to *reviewData* variable and define function *'getSecurityToken'* which will be called 
+for receiving a token before each sending a request for the server.
 
 ```sh
 var control = $("#reviewControl").reviewerSubmittedFiles({
-              reviewData: reviewData
+              reviewData: reviewData,
+              getSecurityToken: function() {
+                  return getToken();
+                  }
               });
 ```
 
@@ -57,6 +62,14 @@ control.reviewerSubmittedFiles("update", {
           });
 ```
 
+For setting new token it is necessary to call following method 
+(when using this method, you must either not define *'getSecurityToken'* function 
+or that *'getSecurityToken'* returns null) 
+
+```sh
+control.reviewerSubmittedFiles("setSecurityToken", token);
+```
+
 ## Uploading control
 Include jQuery, jQueryUI scripts and following files on the page
 
@@ -68,13 +81,19 @@ Include jQuery, jQueryUI scripts and following files on the page
 ```
 
 Create ui-control for any jquery element, assign the necessary business parameters
-to *uploadData* variable and define function which will be called 
-when the possibility of addition of new files for uploading is changed.
+to *uploadData* variable, define function *'setAvailabilityStatusAddingFiles'* which will be called 
+when the possibility of addition of new files for uploading is changed, 
+and define function *'getSecurityToken'* which will be called 
+for receiving a token before each sending a request for the server.
+
 ```sh
 var control = $("#uploadControl").uploaderFiles({
                     uploadData: uploadData,
                     setAvailabilityStatusAddingFiles: function(isAvailable) {
                         $("#selectFiles").prop("disabled", !isAvailable);
+                    },
+                    getSecurityToken: function() {
+                        return getToken();
                     }
                 });
 ```
@@ -83,6 +102,14 @@ For adding of files for uploading to call following method
 
 ```sh
 control.uploaderFiles("addFiles", files);
+```
+
+For setting new token it is necessary to call following method 
+(when using this method, you must either not define *'getSecurityToken'* function 
+or that *'getSecurityToken'* returns null) 
+
+```sh
+control.uploaderFiles("setSecurityToken", token);
 ```
 
 
