@@ -14,12 +14,12 @@ var config = {
 }
 
 // Synchronously delete the output script file(s)
-gulp.task('clean-vendor-scripts', function () {
+gulp.task('clean-vendor-scripts', ['bower-restore'], function () {
     return del([config.webtriadservicebundle]);
 });
 
 //Create a uploader API lib
-gulp.task('webtriadservice', function () {
+gulp.task('webtriadservice', ['clean-vendor-scripts'], function () {
     return gulp.src(config.webtriadservicesrc)
         .pipe(concat('webTriadService.js'))
         .pipe(gulp.dest('Content/uiControls/Scripts'));
@@ -28,4 +28,9 @@ gulp.task('webtriadservice', function () {
 //Restore all bower packages
 gulp.task('bower-restore', function () {
     return bower();
+});
+
+//Set a default tasks 
+gulp.task('default', ['webtriadservice'], function () {
+
 });

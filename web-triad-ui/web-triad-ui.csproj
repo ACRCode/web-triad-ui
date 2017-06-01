@@ -124,6 +124,7 @@
     <Content Include="Content\uiControls\Fonts\MyriadProSemiBold\MyriadProSemiBold.otf" />
     <Content Include="Content\uiControls\Fonts\MyriadProSemiBold\MyriadProSemiBold.ttf" />
     <Content Include="Content\uiControls\Fonts\MyriadProSemiBold\MyriadProSemiBold.woff" />
+    <Content Include="bower.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
