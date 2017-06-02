@@ -465,59 +465,23 @@
         /////////////////////////////////////////////////////////////////////////
 
         _getDicomInfoFromFileDef: function (file, callback) {
-            var reader = new FileReader();
             var deferred = $.Deferred();
             var data = {
                 file: file,
-                studyDescription: "failed",
-                studyDate: "failed",
-                studyTime: "failed",
-                patientName: "failed",
-                studyInstanceUid: "failed",
-                studyId: "failed",
-                seriesDescription: "failed",
-                modality: "failed",
-                seriesNumber: "failed"
+                studyDescription: "none",
+                studyDate: "none",
+                studyTime: "none",
+                patientName: "none",
+                studyInstanceUid: "none",
+                studyId: "none",
+                seriesDescription: "none",
+                modality: "none",
+                seriesNumber: "none"
             }
-            reader.onload = function () {
-                var blob = reader.result;
-                var arr = new Uint8Array(blob);
-                try {
-                    var bb = console.log;
-                    console.log = function () { }
-                    var decoder = decoder_new(arr);
-                    var instance = decoder_readSopInstance(decoder, file.name);
-                    console.log = bb;
-                    if (instance !== undefined) {
-                        data = {
-                            file: file,
-                            studyDescription: instance_get_attributeValue(instance, 0x81030),
-                            studyDate: instance_get_attributeValue(instance, 0x80020),
-                            studyTime: instance_get_attributeValue(instance, 0x80030),
-                            patientName: instance_get_attributeValue(instance, 0x100010),
-                            studyInstanceUid: instance_get_attributeValue(instance, 0x20000D),
-                            studyId: instance_get_attributeValue(instance, 0x200010),
-                            seriesDescription: instance_get_attributeValue(instance, 0x8103E),
-                            modality: instance_get_attributeValue(instance, 0x80060),
-                            seriesNumber: instance_get_attributeValue(instance, 0x200011)
-                        }
-                    } else {
-                        data.studyDescription = "NonDicom";
-                    }
-                    deferred.resolve(data);
-                } catch (err) {
-                    console.log(err.dartException);
-                    deferred.resolve(data);
-                }
-                callback(file.guidOfFileset);
-            }
-            if (file.size < 132) {
-                data.studyDescription = "NonDicom";
-                deferred.resolve(data);
-                callback(file.guidOfFileset);
-            } else {
-                reader.readAsArrayBuffer(file);
-            }
+            data.studyDescription = "none";
+            deferred.resolve(data);
+            callback(file.guidOfFileset);
+
             return deferred.promise();
         },
 
