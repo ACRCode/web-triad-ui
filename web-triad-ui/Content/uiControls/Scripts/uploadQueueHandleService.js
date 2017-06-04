@@ -2,6 +2,7 @@
     var uploadItems = [];
     var container;
     var isUploadInProgress;
+    var onUploadCompleted = [];
 
     var Statuses = { Pending: "Pending", InProgress: "InProgress", Completed: "Completed", Failed: "Failed" };
 
@@ -9,6 +10,7 @@
         init: function (_container) {
             isUploadInProgress = false;
             uploadItems = [];
+            onUploadCompleted = [];
             container = _container;
         },
         addNewTask: function (files) {
@@ -22,6 +24,9 @@
             container.append(uploadTask.getHtml());
 
             if (!isUploadInProgress) triggerUpload();
+        },
+        addOnUploadCompletedHandler: function(onUploadCompletedFunc) {
+            onUploadCompleted.push(onUploadCompletedFunc);
         }
     }
 
@@ -37,6 +42,7 @@
         $.when(taskExecutionPromise)
             .done(function () {
                 uploadItem.status = Statuses.Completed;
+                onUploadCompleted.forEach(function (func) { func(); });
             })
             .fail(function () {
                 uploadItem.status = Statuses.Failed;

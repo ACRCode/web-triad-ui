@@ -25,8 +25,8 @@
     }
 
     this._uploadFilesToServer= function(defer) {
-        //this._fakeUploadWithSuccessResultFunction(0, defer);
-        this._fakeUploadWithFailedResultFunction(0, defer);
+        this._fakeUploadWithSuccessResultFunction(0, defer);
+        //this._fakeUploadWithFailedResultFunction(0, defer);
     }
 
     this._getFileNames = function () {
@@ -44,14 +44,14 @@
     this._fakeUploadWithSuccessResultFunction = function (counter, defer) {
         var self = this;
         console.log("counter: " + counter);
-        if (counter++ === 4) defer.resolve("Done");
+        if (counter++ === 2) defer.resolve("Done");
         else setTimeout(function () { self._fakeUploadWithSuccessResultFunction(counter, defer) }, 1000);
     }
 
     this._fakeUploadWithFailedResultFunction = function (counter, defer) {
         var self = this;
         console.log("counter: " + counter);
-        if (counter++ === 4) defer.reject();
+        if (counter++ === 2) defer.reject();
         else setTimeout(function () { self._fakeUploadWithFailedResultFunction(counter, defer) }, 1000);
     }
 

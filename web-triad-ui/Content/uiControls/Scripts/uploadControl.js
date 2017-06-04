@@ -47,6 +47,7 @@
             this.element.html(studies_E);
 
             UploadQueueHandleService.init(this.element.find(".tc-parsingPanel tbody"));
+            UploadQueueHandleService.addOnUploadCompletedHandler(this._fakeUpdate);
         },
 
         /////////////////////////////////////////////////////////////////////////
@@ -146,6 +147,11 @@
         },
 
         /////////////////////////////////////////////////////////////////////////
+
+        _fakeUpdate: function () {
+            console.log("update review after upload completion");
+            $("div.tc-wrapper").show().append("Review update!");
+        },
 
         _update: function () {
             let self = this;
