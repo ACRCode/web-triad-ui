@@ -17,6 +17,21 @@
         if (self._progressBarMaxValue === null)
             throw new "Error. Progress bar component was not initialized. Please call showProgressBar function before updateProgressBar";
 
-        self._container.find(".tc-parsing-progress span").width(processedValue / self._progressBarMaxValue * 100);
+        self._container.find(".tc-upload-progress span").width((processedValue / self._progressBarMaxValue * 100) + "%");
+    }
+
+    this.showStatus = function (status) {
+        let self = this;
+
+        self._container.empty();
+        self._container.html(status);
+    }
+
+    this.showStatusWithRetryButton = function (status)
+    {
+        let self = this;
+
+        self.showStatus(status);
+        self._container.append("<span class='tc-retry-upload'></span>");
     }
 }

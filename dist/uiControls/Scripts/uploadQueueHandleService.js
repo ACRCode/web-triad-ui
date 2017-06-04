@@ -54,7 +54,6 @@
                 uploadItem.status = Statuses.Failed;
             })
             .always(function () {
-                container.find("tr[data-fileset-uid='" + uploadItem.id + "']> td.tc-parsing-progress").html(uploadItem.status);
                 triggerUpload();
             });
     }

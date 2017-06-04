@@ -72,7 +72,7 @@
             for (let i = 1; i < count; i++) {
                 filesNames += ", " + files[i].name;
             }*/
-            var progressBar_E = $(self._progressBar_T).addClass("tc-progress-parsing").show();
+/*            var progressBar_E = $(self._progressBar_T).addClass("tc-progress-parsing").show();
             var parsingPanel = self.element.find(".tc-parsingPanel tbody");
             parsingPanel.append(
                 "<tr data-fileset-uid='" + guidOfFileset + "'>" +
@@ -83,8 +83,8 @@
                 "<td class='tc-parsing-progress' style='text-align: center;'></td>" +
                 "<td style='text-align: center;'><span class='tc-delete-series'></span></td>" +
                 "</tr>"
-            );
-            parsingPanel.find("tr[data-fileset-uid='" + guidOfFileset + "']> td.tc-parsing-progress").append(progressBar_E);
+            );*/
+           // parsingPanel.find("tr[data-fileset-uid='" + guidOfFileset + "']> td.tc-parsing-progress").append(progressBar_E);
           /*  var deferreds = [];
             for (let i = 0; i < files.length; i++) {
                 files[i].guidOfFileset = guidOfFileset;

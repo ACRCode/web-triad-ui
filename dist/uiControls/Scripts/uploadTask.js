@@ -4,6 +4,7 @@
     this._files = files;
     this._isUploadInProgress = false;
     this._uploadStatusComponent;
+    this._isCanceled = false;
 
     this.onRetryRequested = function (guidOfFilesSet){ console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet)};
 
@@ -60,6 +61,7 @@
 
     this._cancelUpload = function () {
         let self = this;
+        self._isCanceled = true;
         console.log("Upload was canceled for " + self._guidOfFilesSet);
     }
 
@@ -82,27 +84,24 @@
     this._fakeUploadWithSuccessResultFunction = function (counter, defer) {
         let self = this;
         console.log("counter: " + counter);
-        if (counter++ === 4) {
+        self._uploadStatusComponent.updateProgressBar(counter);
+        if (counter++ === 4 || self._isCanceled) {
             defer.resolve("Done");
             self._isUploadInProgress = false;
+            self._uploadStatusComponent.showStatusWithRetryButton(self._isCanceled ? "Canceled" : "Completed");
         }
-        else
-        {
-            self._uploadStatusComponent.updateProgressBar(counter);
-             setTimeout(function () { self._fakeUploadWithSuccessResultFunction(counter, defer) }, 1000);
-        }
+        else setTimeout(function () { self._fakeUploadWithSuccessResultFunction(counter, defer) }, 1000);
     }
 
     this._fakeUploadWithFailedResultFunction = function (counter, defer) {
         let self = this;
         console.log("counter: " + counter);
-        if (counter++ === 4) {
+        self._uploadStatusComponent.updateProgressBar(counter);
+        if (counter++ === 4 || self._isCanceled) {
             defer.reject();
             self._isUploadInProgress = false;
+            self._uploadStatusComponent.showStatus(self._isCanceled ? "Canceled" : "Failed");
         }
-        else {
-            self._uploadStatusComponent.updateProgressBar(counter);
-            setTimeout(function () { self._fakeUploadWithFailedResultFunction(counter, defer) }, 1000);
-        }
+        else setTimeout(function () { self._fakeUploadWithFailedResultFunction(counter, defer) }, 1000);
     }
 }

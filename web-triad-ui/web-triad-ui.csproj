@@ -88,6 +88,7 @@
     <Content Include="Content\uiControls\Images\image.png" />
     <Content Include="Content\uiControls\Images\minus.png" />
     <Content Include="Content\uiControls\Images\plus.png" />
+    <Content Include="Content\uiControls\Images\retry.png" />
     <Content Include="Content\uiControls\Images\upload-btn.png" />
     <Content Include="Content\uiControls\Images\upload.png" />
     <Content Include="Content\uiControls\Scripts\dicomApi.js" />

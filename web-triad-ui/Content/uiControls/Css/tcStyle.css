@@ -225,6 +225,17 @@ span.tc-anonymization {
     cursor: pointer;  
 }
 
+span.tc-retry-upload
+{
+    width: 13px;
+    height: 13px;
+    display: inline-block;
+    background-image: url(../Images/retry.png);
+    background-repeat: no-repeat;
+    cursor: pointer;  
+    margin-left: 5px;
+}
+
 span.tc-cancel-or-remove-upload-from-queue,
 span.tc-delete-series {
     width: 16px;
@@ -234,7 +245,6 @@ span.tc-delete-series {
     cursor: pointer;  
     margin: auto;
 }
-
 
 .tc-table-study input[type=checkbox] {
     display: none;

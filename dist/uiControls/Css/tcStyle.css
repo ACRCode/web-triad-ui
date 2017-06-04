@@ -225,6 +225,17 @@ span.tc-anonymization {
     cursor: pointer;  
 }
 
+span.tc-retry-upload
+{
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+    background-image: url(../Images/retry.png);
+    background-repeat: no-repeat;
+    cursor: pointer;  
+    margin: auto;
+}
+
 span.tc-cancel-or-remove-upload-from-queue,
 span.tc-delete-series {
     width: 16px;
@@ -234,7 +245,6 @@ span.tc-delete-series {
     cursor: pointer;  
     margin: auto;
 }
-
 
 .tc-table-study input[type=checkbox] {
     display: none;
@@ -314,14 +324,14 @@ span.tc-delete-series {
         background-color: #73a0af;
 }
 
-.tc-progress-bar.tc-progress-parsing {
+.tc-progress-bar.tc-upload-progress {
         height: 15px;
         width: 80%;
         margin-left: auto;
         margin-right: auto;
 }
 
-.tc-progress-bar.tc-progress-parsing span {
+.tc-progress-bar.tc-upload-progress span {
         height: 15px;
         width: 0;
 }
