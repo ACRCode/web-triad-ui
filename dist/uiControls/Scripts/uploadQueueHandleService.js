@@ -37,6 +37,8 @@
     }
 
     function triggerUpload() {
+        isUploadInProgress = true;
+
         var uploadItem = pullUploadItemFromQueue();
         
         if (uploadItem == null) {

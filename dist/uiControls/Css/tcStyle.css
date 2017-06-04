@@ -227,13 +227,13 @@ span.tc-anonymization {
 
 span.tc-retry-upload
 {
-    width: 32px;
-    height: 32px;
+    width: 13px;
+    height: 13px;
     display: inline-block;
     background-image: url(../Images/retry.png);
     background-repeat: no-repeat;
     cursor: pointer;  
-    margin: auto;
+    margin-left: 5px;
 }
 
 span.tc-cancel-or-remove-upload-from-queue,

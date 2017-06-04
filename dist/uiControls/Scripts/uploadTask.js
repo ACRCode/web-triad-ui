@@ -5,6 +5,7 @@
     this._isUploadInProgress = false;
     this._uploadStatusComponent;
     this._isCanceled = false;
+    let waitingStatusText = "In Queue";
 
     this.onRetryRequested = function (guidOfFilesSet){ console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet)};
 
@@ -37,7 +38,8 @@
             else removeOrCancelButton.attr("title", "Remove Selection");
         });
 
-        this._uploadStatusComponent = new UploadStatusComponent(uploadRowElement.find("td.tc-upload-status"));
+        self._uploadStatusComponent = new UploadStatusComponent(uploadRowElement.find("td.tc-upload-status"));
+        self._uploadStatusComponent.showStatus(waitingStatusText);
     }
 
     this.execute = function() {
@@ -65,8 +67,10 @@
         console.log("Upload was canceled for " + self._guidOfFilesSet);
     }
 
-    this._retry = function (){
-        this.onRetryRequested(this._guidOfFilesSet);
+    this._retry = function (self) {
+        self._isCanceled = false;
+        self._uploadStatusComponent.showStatus(waitingStatusText);
+        self.onRetryRequested(self._guidOfFilesSet);
     }
 
     this._getFileNames = function () {
@@ -88,7 +92,8 @@
         if (counter++ === 4 || self._isCanceled) {
             defer.resolve("Done");
             self._isUploadInProgress = false;
-            self._uploadStatusComponent.showStatusWithRetryButton(self._isCanceled ? "Canceled" : "Completed");
+            if (self._isCanceled) self._uploadStatusComponent.showStatusWithRetryButton("Canceled", function() { self._retry(self); });
+            else self._uploadStatusComponent.showStatus("Completed");
         }
         else setTimeout(function () { self._fakeUploadWithSuccessResultFunction(counter, defer) }, 1000);
     }
@@ -100,7 +105,8 @@
         if (counter++ === 4 || self._isCanceled) {
             defer.reject();
             self._isUploadInProgress = false;
-            self._uploadStatusComponent.showStatus(self._isCanceled ? "Canceled" : "Failed");
+            if (self._isCanceled) self._uploadStatusComponent.showStatusWithRetryButton("Canceled", function () { self._retry(self); });
+            else self._uploadStatusComponent.showStatus("Failed");
         }
         else setTimeout(function () { self._fakeUploadWithFailedResultFunction(counter, defer) }, 1000);
     }
