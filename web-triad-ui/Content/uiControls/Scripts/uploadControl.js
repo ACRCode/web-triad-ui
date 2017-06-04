@@ -19,9 +19,9 @@
         },
         
 
-        /*_service: null,
+        _service: null,
 
-        _studies: {},
+        /*_studies: {},
 
         _filesProcessing: {},
 
@@ -43,11 +43,18 @@
             this._studiesUploading = {};
             this._dictionaryStateOfCollapse = {};
             this._checkAvailabilityStatusAddingFiles();*/
-            var studies_E = $(this._studies_T);
-            this.element.html(studies_E);
+
             let self = this;
-            var webTriadService = new WebTriadService(self.options.serviceParam);
-            UploadQueueHandleService.init(webTriadService, this.element.find(".tc-parsingPanel tbody"));
+
+            var studies_E = $(self._studies_T);
+            self.element.html(studies_E);
+
+            self._service = new WebTriadService(self.options.serviceParam);
+
+            var token = self.options.getSecurityToken();
+            self.setSecurityToken(token);
+
+            UploadQueueHandleService.init(self._service, this.element.find(".tc-parsingPanel tbody"));
             UploadQueueHandleService.addOnUploadCompletedHandler(this._fakeUpdate);
         },
 
