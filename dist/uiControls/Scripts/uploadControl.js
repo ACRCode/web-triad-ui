@@ -17,6 +17,7 @@
             },
             securityToken: null
         },
+        
 
         _service: null,
 
@@ -44,6 +45,8 @@
             this._checkAvailabilityStatusAddingFiles();
             var studies_E = $(this._studies_T);
             this.element.html(studies_E);
+
+            UploadQueueHandleService.init(self.element.find(".tc-parsingPanel tbody"));
         },
 
         /////////////////////////////////////////////////////////////////////////
@@ -57,7 +60,8 @@
         addFiles: function (files) {
             let self = this;
             self.element.find(".tc-parsingPanel").show();
-            var guidOfFileset = self._getGuid();
+            UploadQueueHandleService.addNewTask(files);
+/*            var guidOfFileset = self._getGuid();
             self._filesProcessing[guidOfFileset] = {
                 quantity: files.length,
                 processed: 0
@@ -66,8 +70,8 @@
             var filesNames = files[0].name;
             for (let i = 1; i < count; i++) {
                 filesNames += ", " + files[i].name;
-            }
-            var progressBar_E = $(self._progressBar_T).addClass("tc-progress-parsing").show();
+            }*/
+/*            var progressBar_E = $(self._progressBar_T).addClass("tc-progress-parsing").show();
             var parsingPanel = self.element.find(".tc-parsingPanel tbody");
             parsingPanel.append(
                 "<tr data-fileset-uid='" + guidOfFileset + "'>" +
@@ -76,9 +80,10 @@
                 "</div></td>" +
                 "<td style='text-align: center;'>" + files.length + "</td>" +
                 "<td class='tc-parsing-progress' style='text-align: center;'></td>" +
+                "<td style='text-align: center;'><span class='tc-delete-series'></span></td>" +
                 "</tr>"
-            );
-            parsingPanel.find("tr[data-fileset-uid='" + guidOfFileset + "']> td.tc-parsing-progress").append(progressBar_E);
+            );*/
+           // parsingPanel.find("tr[data-fileset-uid='" + guidOfFileset + "']> td.tc-parsing-progress").append(progressBar_E);
             var deferreds = [];
             for (let i = 0; i < files.length; i++) {
                 files[i].guidOfFileset = guidOfFileset;
@@ -123,13 +128,13 @@
             $.when(processingFiles).done(function () {
                 self._update();
                 var parsingTr = parsingPanel.find("tr[data-fileset-uid='" + guidOfFileset + "']");
-                parsingTr.fadeOut(600, function () {
+               /* parsingTr.fadeOut(600, function () {
                     delete self._filesProcessing[guidOfFileset];
-                    parsingTr.remove();
+                    //parsingTr.remove();
                     if (Object.keys(self._filesProcessing).length === 0) {
-                        self.element.find(".tc-parsingPanel").hide();
+                       // self.element.find(".tc-parsingPanel").hide();
                     }
-                });
+                });*/
             });
 
             function callback(guidOfSet) {
@@ -493,7 +498,8 @@
                 "<thead><tr>" +
                 "<th style='padding-left: 15px;'>Files</th>" +
                 "<th style='width: 100px; text-align: center'># of Files</th>" +
-                "<th style='width: 350px; text-align: center'>Parsing Status</th>" +
+                "<th style='width: 300px; text-align: center'>Upload Status</th>" +
+                "<th style='width: 50px; text-align: center'></th>" +
                 "</tr></thead>" +
                 "<tbody></tbody>" +
                 "</table>" +
@@ -534,7 +540,7 @@
                 "</td></tr>",
 
         _progressBar_T:
-            "<div class='tc-progress-bar' style='display: none;'>" +
+            "<div class='tc-progress-bar'>" +
                 "<span></span>" +
                 "</div>"
     });

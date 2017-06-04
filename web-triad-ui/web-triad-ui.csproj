@@ -93,6 +93,8 @@
     <Content Include="Content\uiControls\Scripts\dicomApi.js" />
     <Content Include="Content\uiControls\Scripts\reviewControl.js" />
     <Content Include="Content\uiControls\Scripts\uploadControl.js" />
+    <Content Include="Content\uiControls\Scripts\uploadQueueHandleService.js" />
+    <Content Include="Content\uiControls\Scripts\uploadTask.js" />
     <Content Include="Content\uiControls\Scripts\webTriadService.js" />
     <Content Include="Global.asax" />
     <Content Include="gulpfile.js" />
