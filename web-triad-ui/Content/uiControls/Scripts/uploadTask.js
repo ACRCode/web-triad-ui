@@ -1,12 +1,13 @@
 ﻿function UploadTask(files, guidOfFilesSet) {
-    this.guidOfFileSet = guidOfFilesSet;
+    this.guidOfFilesSet = guidOfFilesSet;
     this.files = files;
+    this.onRetryRequested = function (guidOfFilesSet){ console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet)};
 
     this.getHtml = function () {
         let self = this;
 
         var fileNames = self._getFileNames();
-        return "<tr data-fileset-uid='" + self.guidOfFileSet + "'>" +
+        return "<tr data-fileset-uid='" + self.guidOfFilesSet + "'>" +
                "<td style='padding-left: 15px;'><div style='text-overflow: ellipsis;overflow: hidden;width: 300px;white-space: nowrap;'>" +
                fileNames +
                "</div></td>" +
@@ -14,6 +15,11 @@
                "<td class='tc-parsing-progress' style='text-align: center;'></td>" +
                "<td style='text-align: center;'><span class='tc-delete-series'></span></td>" +
                "</tr>";
+    }
+
+    this.bindEvents = function (uploadRowElement) {
+        let self = this;
+        uploadRowElement.find("span.tc-delete-series").click(function () { self.onRetryRequested(self.guidOfFilesSet); });
     }
 
     this.execute = function() {
@@ -27,6 +33,10 @@
     this._uploadFilesToServer= function(defer) {
         this._fakeUploadWithSuccessResultFunction(0, defer);
         //this._fakeUploadWithFailedResultFunction(0, defer);
+    }
+
+    this._retry = function (){
+        this.onRetryRequested(this.guidOfFilesSet);
     }
 
     this._getFileNames = function () {

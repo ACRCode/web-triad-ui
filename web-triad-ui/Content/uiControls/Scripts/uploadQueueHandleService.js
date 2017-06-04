@@ -20,8 +20,13 @@
             var guidOfFileset = getGuid();
             var uploadTask = new UploadTask(files, guidOfFileset);
 
-            uploadItems.push({ id: guidOfFileset, task: uploadTask, status: Statuses.Pending });
+            var newUploadItem = { id: guidOfFileset, task: uploadTask, status: Statuses.Pending };
+            uploadItems.push(newUploadItem);
+
             container.append(uploadTask.getHtml());
+            uploadTask.bindEvents(container.find("tr[data-fileset-uid='" + newUploadItem.id + "']"));
+
+            uploadTask.onRetryRequested = retryUpload;
 
             if (!isUploadInProgress) triggerUpload();
         },
@@ -33,7 +38,7 @@
     function triggerUpload() {
         var uploadItem = pullUploadItemFromQueue();
         
-        if (uploadItem == null || typeof uploadItem == "undefined") {
+        if (uploadItem == null) {
             isUploadInProgress = false;
             return;
         }
@@ -51,6 +56,13 @@
                 container.find("tr[data-fileset-uid='" + uploadItem.id + "']> td.tc-parsing-progress").html(uploadItem.status);
                 triggerUpload();
             });
+    }
+
+    function retryUpload(id) {
+        var uploadItemToRetry = uploadItems.find(function (item) { return item.id === id });
+        if (uploadItemToRetry == null) return;
+        uploadItemToRetry.status = Statuses.Pending;
+        if (!isUploadInProgress) triggerUpload();
     }
 
     function pullUploadItemFromQueue() {

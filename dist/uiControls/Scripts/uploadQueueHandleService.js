@@ -25,8 +25,8 @@
 
             if (!isUploadInProgress) triggerUpload();
         },
-        addOnUploadCompletedHandler: function(onUploadCompleted) {
-            onUploadCompleted.push(onUploadCompleted);
+        addOnUploadCompletedHandler: function(onUploadCompletedFunc) {
+            onUploadCompleted.push(onUploadCompletedFunc);
         }
     }
 
