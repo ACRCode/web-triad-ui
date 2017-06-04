@@ -19,7 +19,7 @@
         },
         
 
-        _service: null,
+        /*_service: null,
 
         _studies: {},
 
@@ -27,7 +27,7 @@
 
         _studiesUploading: {},
 
-        _dictionaryStateOfCollapse: {},
+        _dictionaryStateOfCollapse: {},*/
 
         /////////////////////////////////////////////////////////////////////////
         setSecurityToken: function (token) {
@@ -38,15 +38,16 @@
         },
 
         _create: function () {
-            this._studies = {};
+           /* this._studies = {};
             this._filesProcessing = {};
             this._studiesUploading = {};
             this._dictionaryStateOfCollapse = {};
-            this._checkAvailabilityStatusAddingFiles();
+            this._checkAvailabilityStatusAddingFiles();*/
             var studies_E = $(this._studies_T);
             this.element.html(studies_E);
-
-            UploadQueueHandleService.init(this.element.find(".tc-parsingPanel tbody"));
+            let self = this;
+            var webTriadService = new WebTriadService(self.options.serviceParam);
+            UploadQueueHandleService.init(webTriadService, this.element.find(".tc-parsingPanel tbody"));
             UploadQueueHandleService.addOnUploadCompletedHandler(this._fakeUpdate);
         },
 
@@ -62,88 +63,6 @@
             let self = this;
             self.element.find(".tc-parsingPanel").show();
             UploadQueueHandleService.addNewTask(files);
-/*            var guidOfFileset = self._getGuid();
-            self._filesProcessing[guidOfFileset] = {
-                quantity: files.length,
-                processed: 0
-            };
-            var count = files.length > 4 ? 3 : files.length;
-            var filesNames = files[0].name;
-            for (let i = 1; i < count; i++) {
-                filesNames += ", " + files[i].name;
-            }*/
-/*            var progressBar_E = $(self._progressBar_T).addClass("tc-progress-parsing").show();
-            var parsingPanel = self.element.find(".tc-parsingPanel tbody");
-            parsingPanel.append(
-                "<tr data-fileset-uid='" + guidOfFileset + "'>" +
-                "<td style='padding-left: 15px;'><div style='text-overflow: ellipsis;overflow: hidden;width: 300px;white-space: nowrap;'>" +
-                filesNames +
-                "</div></td>" +
-                "<td style='text-align: center;'>" + files.length + "</td>" +
-                "<td class='tc-parsing-progress' style='text-align: center;'></td>" +
-                "<td style='text-align: center;'><span class='tc-delete-series'></span></td>" +
-                "</tr>"
-            );*/
-           // parsingPanel.find("tr[data-fileset-uid='" + guidOfFileset + "']> td.tc-parsing-progress").append(progressBar_E);
-          /*  var deferreds = [];
-            for (let i = 0; i < files.length; i++) {
-                files[i].guidOfFileset = guidOfFileset;
-                deferreds.push(self._getDicomInfoFromFileDef(files[i], callback));
-            }
-            var processingFiles = $.when.apply($, deferreds).done(function () {
-                var deferred = $.Deferred();
-                $.each(arguments, function (i, data) {
-                    if (!self._studies.hasOwnProperty(data.studyInstanceUid)) {
-                        self._studies[data.studyInstanceUid] = {
-                            series: {}
-                        };
-                    }
-                    if (!self._studies[data.studyInstanceUid].series.hasOwnProperty(data.seriesNumber)) {
-                        self._studies[data.studyInstanceUid].series[data.seriesNumber] = {
-                            files: []
-                        };
-                    }
-                    self._studies[data.studyInstanceUid]["StudyInstanceUid"] = data.studyInstanceUid;
-                    self._studies[data.studyInstanceUid]["StudyDescription"] = data.studyDescription;
-                    self._studies[data.studyInstanceUid]["StudyDate"] = data.studyDate;
-                    self._studies[data.studyInstanceUid]["StudyId"] = data.studyId;
-                    self._studies[data.studyInstanceUid].series[data.seriesNumber]["SeriesDescription"] = data.seriesDescription;
-                    self._studies[data.studyInstanceUid].series[data.seriesNumber]["Modality"] = data.modality;
-                    self._studies[data.studyInstanceUid].series[data.seriesNumber]["SeriesNumber"] = data.seriesNumber;
-                    self._studies[data.studyInstanceUid].series[data.seriesNumber].files.push(data.file);
-                });
-                for (let studyUid in self._studies) {
-                    if (self._studies.hasOwnProperty(studyUid)) {
-                        var studySize = 0;
-                        for (let seriesId in self._studies[studyUid].series) {
-                            if (self._studies[studyUid].series.hasOwnProperty(seriesId)) {
-                                studySize += self._getSizeOfListFiles(self._studies[studyUid].series[seriesId].files);
-                            }
-                        }
-                        self._studies[studyUid]["StudySize"] = studySize;
-                    }
-                }
-                deferred.resolve();
-                return deferred.promise();
-            });
-            $.when(processingFiles).done(function () {
-                self._update();
-                var parsingTr = parsingPanel.find("tr[data-fileset-uid='" + guidOfFileset + "']");
-               /* parsingTr.fadeOut(600, function () {
-                    delete self._filesProcessing[guidOfFileset];
-                    //parsingTr.remove();
-                    if (Object.keys(self._filesProcessing).length === 0) {
-                       // self.element.find(".tc-parsingPanel").hide();
-                    }
-                });#1#
-            });*/
-
-            function callback(guidOfSet) {
-                var progressParsing = $(".tc-table-parsingPanel tr[data-fileset-uid='" + guidOfSet + "'] .tc-parsing-progress span");
-                var val = self._filesProcessing[guidOfSet];
-                var width = ++val.processed / val.quantity * 100;
-                progressParsing.width(width + "%");
-            };
         },
 
         /////////////////////////////////////////////////////////////////////////
@@ -153,7 +72,7 @@
             $("div.tc-wrapper").show().append("Review update!");
         },
 
-        _update: function () {
+     /*   _update: function () {
             let self = this;
             self._service = new WebTriadService(self.options.serviceParam);
             self.element.find(".tc-wrapper").show();
@@ -494,7 +413,7 @@
             callback(file.guidOfFileset);
 
             return deferred.promise();
-        },
+        }, */
 
         /////////////////////////////////////////////////////////////////////////
 
@@ -526,8 +445,8 @@
                 "</table>" +
                 "<button type='button' id='uploadAll' class='tc-btn'>" +
                 "<span class='tc-btn-icon'></span>Upload All</button>" +
-                "</div>",
-
+                "</div>"
+/*
         _series_T:
             "<tr><td colspan='7'>" +
                 "<div class='tc-series'>" +
@@ -548,6 +467,6 @@
         _progressBar_T:
             "<div class='tc-progress-bar'>" +
                 "<span></span>" +
-                "</div>"
+                "</div>"*/
     });
 })(jQuery, window, document);

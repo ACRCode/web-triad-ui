@@ -3,23 +3,25 @@
     var container;
     var isUploadInProgress = null;
     var onUploadCompleted = [];
+    var webService = null;
 
     var Statuses = { Pending: "Pending", InProgress: "InProgress", Completed: "Completed", Failed: "Failed" };
 
     return{
-        init: function (_container) {
+        init: function (_webService, _container) {
             isUploadInProgress = false;
             uploadItems = [];
             onUploadCompleted = [];
             container = _container;
+            webService = _webService;
         },
         addNewTask: function (files) {
 
-            if (isUploadInProgress === null)
-                throw new "Error. UploadQueueService was not initialized before using. Please call method init(_cotainer) to initialize the service.";
+            if (isUploadInProgress === null || webService === null)
+                throw new "Error. UploadQueueService was not initialized before using. Please call method init to initialize the service.";
 
             var guidOfFileset = getGuid();
-            var uploadTask = new UploadTask(files, guidOfFileset);
+            var uploadTask = new UploadTask(files, guidOfFileset, webService);
 
             var newUploadItem = { id: guidOfFileset, task: uploadTask, status: Statuses.Pending };
             uploadItems.push(newUploadItem);

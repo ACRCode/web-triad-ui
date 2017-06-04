@@ -1,11 +1,14 @@
-﻿function UploadTask(files, guidOfFilesSet) {
+﻿function UploadTask(files, guidOfFilesSet, webService) {
+    
+    let waitingStatusText = "In Queue";
 
     this._guidOfFilesSet = guidOfFilesSet;
     this._files = files;
     this._isUploadInProgress = false;
     this._uploadStatusComponent;
     this._isCanceled = false;
-    let waitingStatusText = "In Queue";
+    this._webService = webService;
+    
 
     this.onRetryRequested = function (guidOfFilesSet){ console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet)};
 
@@ -55,9 +58,11 @@
 
         self._isUploadInProgress = true;
 
-        self._uploadStatusComponent.showProgressBar(4);
+        self._uploadStatusComponent.showProgressBar();
 
-        self._fakeUploadWithSuccessResultFunction(1, defer);
+        self._webService.submitFiles(files, [], function(result) { self._handleUploadProgress(result, defer); });
+
+        //self._fakeUploadWithSuccessResultFunction(1, defer);
         //self._fakeUploadWithFailedResultFunction(1, defer);
     }
 
@@ -84,11 +89,33 @@
 
         return filesNames;
     }
+    
+    this._handleUploadProgress = function(result, defer) {
+        let self = this;
+
+        switch (result.status) {
+            case ProcessStatus.Success:
+                self._uploadStatusComponent.updateProgressBar(result.progress);
+                self._uploadStatusComponent.showStatus("Completed");
+                self._isUploadInProgress = false;
+                defer.resolve();
+                break;
+            case ProcessStatus.InProgress:
+                self._uploadStatusComponent.updateProgressBar(result.progress);
+                break;
+            case ProcessStatus.Error:
+                self._isUploadInProgress = false;
+                self._uploadStatusComponent.showStatusWithRetryButton("Failed", function () { self._retry(self); });
+                defer.reject();
+                break;
+            default:
+        }
+    }
 
     this._fakeUploadWithSuccessResultFunction = function (counter, defer) {
         let self = this;
         console.log("counter: " + counter);
-        self._uploadStatusComponent.updateProgressBar(counter);
+        self._uploadStatusComponent.updateProgressBar(counter / 4 * 100);
         if (counter++ === 4 || self._isCanceled) {
             defer.resolve("Done");
             self._isUploadInProgress = false;
@@ -101,7 +128,7 @@
     this._fakeUploadWithFailedResultFunction = function (counter, defer) {
         let self = this;
         console.log("counter: " + counter);
-        self._uploadStatusComponent.updateProgressBar(counter);
+        self._uploadStatusComponent.updateProgressBar(counter / 4 * 100);
         if (counter++ === 4 || self._isCanceled) {
             defer.reject();
             self._isUploadInProgress = false;
