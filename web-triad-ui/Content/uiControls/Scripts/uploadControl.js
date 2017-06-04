@@ -84,7 +84,7 @@
                 "</tr>"
             );*/
            // parsingPanel.find("tr[data-fileset-uid='" + guidOfFileset + "']> td.tc-parsing-progress").append(progressBar_E);
-            var deferreds = [];
+          /*  var deferreds = [];
             for (let i = 0; i < files.length; i++) {
                 files[i].guidOfFileset = guidOfFileset;
                 deferreds.push(self._getDicomInfoFromFileDef(files[i], callback));
@@ -134,8 +134,8 @@
                     if (Object.keys(self._filesProcessing).length === 0) {
                        // self.element.find(".tc-parsingPanel").hide();
                     }
-                });*/
-            });
+                });#1#
+            });*/
 
             function callback(guidOfSet) {
                 var progressParsing = $(".tc-table-parsingPanel tr[data-fileset-uid='" + guidOfSet + "'] .tc-parsing-progress span");

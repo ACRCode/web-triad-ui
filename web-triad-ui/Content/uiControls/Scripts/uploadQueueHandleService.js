@@ -1,14 +1,14 @@
 ﻿var UploadQueueHandleService = (function () {
-    var tasks = [];
+    var uploadItems = [];
     var container;
     var isUploadInProgress;
 
-    var Statuses = { Pending: "Pending", InProgress: "InProgress", Completed: "Completed" };
+    var Statuses = { Pending: "Pending", InProgress: "InProgress", Completed: "Completed", Failed: "Failed" };
 
     return{
         init: function (_container) {
             isUploadInProgress = false;
-            tasks = [];
+            uploadItems = [];
             container = _container;
         },
         addNewTask: function (files) {
@@ -18,7 +18,7 @@
             var guidOfFileset = getGuid();
             var uploadTask = new UploadTask(files, guidOfFileset);
 
-            tasks.push({ id: guidOfFileset, task: uploadTask, status: Statuses.Pending });
+            uploadItems.push({ id: guidOfFileset, task: uploadTask, status: Statuses.Pending });
             container.append(uploadTask.getHtml());
 
             if (!isUploadInProgress) triggerUpload();
@@ -26,7 +26,33 @@
     }
 
     function triggerUpload() {
-        console.log("Upload was started.");
+        var uploadItem = pullUploadItemFromQueue();
+        
+        if (uploadItem == null || typeof uploadItem == "undefined") {
+            isUploadInProgress = false;
+            return;
+        }
+
+        var taskExecutionPromise = uploadItem.task.execute();
+        $.when(taskExecutionPromise)
+            .done(function () {
+                uploadItem.status = Statuses.Completed;
+            })
+            .fail(function () {
+                uploadItem.status = Statuses.Failed;
+            })
+            .always(function () {
+                container.find("tr[data-fileset-uid='" + uploadItem.id + "']> td.tc-parsing-progress").html(uploadItem.status);
+                triggerUpload();
+            });
+    }
+
+    function pullUploadItemFromQueue() {
+        return uploadItems.find(pendingTaskPredicate);
+    }
+
+    function pendingTaskPredicate(task) {
+        return task.status === Statuses.Pending;
     }
 
     function getGuid() {
