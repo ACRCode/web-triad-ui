@@ -1,7 +1,10 @@
 ﻿function UploadTask(files, guidOfFilesSet) {
-    this.guidOfFilesSet = guidOfFilesSet;
-    this.files = files;
-    this.isUploadInProgress = false;
+
+    this._guidOfFilesSet = guidOfFilesSet;
+    this._files = files;
+    this._isUploadInProgress = false;
+    this._uploadStatusComponent;
+    this._isCanceled = false;
 
     this.onRetryRequested = function (guidOfFilesSet){ console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet)};
 
@@ -9,12 +12,12 @@
         let self = this;
 
         var fileNames = self._getFileNames();
-        return "<tr data-fileset-uid='" + self.guidOfFilesSet + "'>" +
+        return "<tr data-fileset-uid='" + self._guidOfFilesSet + "'>" +
                "<td style='padding-left: 15px;'><div style='text-overflow: ellipsis;overflow: hidden;width: 300px;white-space: nowrap;'>" +
                fileNames +
                "</div></td>" +
-               "<td style='text-align: center;'>" + self.files.length + "</td>" +
-               "<td class='tc-parsing-progress' style='text-align: center;'></td>" +
+               "<td style='text-align: center;'>" + self._files.length + "</td>" +
+               "<td class='tc-upload-status' style='text-align: center;'></td>" +
                "<td style='text-align: center;'><span title='' class='tc-cancel-or-remove-upload-from-queue'></span></td>" +
                "</tr>";
     }
@@ -25,14 +28,16 @@
         var removeOrCancelButton = uploadRowElement.find("span.tc-cancel-or-remove-upload-from-queue");
 
         removeOrCancelButton.click(function () {
-            if (self.isUploadInProgress) self._cancelUpload();
+            if (self._isUploadInProgress) self._cancelUpload();
             else uploadRowElement.remove();
         });
 
         removeOrCancelButton.mousemove(function () {
-            if (self.isUploadInProgress) removeOrCancelButton.attr("title", "Cancel Upload");
+            if (self._isUploadInProgress) removeOrCancelButton.attr("title", "Cancel Upload");
             else removeOrCancelButton.attr("title", "Remove Selection");
         });
+
+        this._uploadStatusComponent = new UploadStatusComponent(uploadRowElement.find("td.tc-upload-status"));
     }
 
     this.execute = function() {
@@ -44,27 +49,33 @@
     }
 
     this._uploadFilesToServer = function (defer) {
-        this.isUploadInProgress = true;
-        this._fakeUploadWithSuccessResultFunction(0, defer);
-        //this._fakeUploadWithFailedResultFunction(0, defer);
+        let self = this;
+
+        self._isUploadInProgress = true;
+
+        self._uploadStatusComponent.showProgressBar(4);
+
+        self._fakeUploadWithSuccessResultFunction(1, defer);
+        //self._fakeUploadWithFailedResultFunction(1, defer);
     }
 
     this._cancelUpload = function () {
         let self = this;
-        console.log("Upload was canceled for " + self.guidOfFilesSet);
+        self._isCanceled = true;
+        console.log("Upload was canceled for " + self._guidOfFilesSet);
     }
 
     this._retry = function (){
-        this.onRetryRequested(this.guidOfFilesSet);
+        this.onRetryRequested(this._guidOfFilesSet);
     }
 
     this._getFileNames = function () {
         let self = this;
 
-        var count = self.files.length > 4 ? 3 : self.files.length;
-        var filesNames = self.files[0].name;
+        var count = self._files.length > 4 ? 3 : self._files.length;
+        var filesNames = self._files[0].name;
         for (let i = 1; i < count; i++) {
-            filesNames += ", " + self.files[i].name;
+            filesNames += ", " + self._files[i].name;
         }
 
         return filesNames;
@@ -73,9 +84,11 @@
     this._fakeUploadWithSuccessResultFunction = function (counter, defer) {
         let self = this;
         console.log("counter: " + counter);
-        if (counter++ === 4) {
+        self._uploadStatusComponent.updateProgressBar(counter);
+        if (counter++ === 4 || self._isCanceled) {
             defer.resolve("Done");
-            self.isUploadInProgress = false;
+            self._isUploadInProgress = false;
+            self._uploadStatusComponent.showStatus(self._isCanceled ? "Canceled" : "Completed");
         }
         else setTimeout(function () { self._fakeUploadWithSuccessResultFunction(counter, defer) }, 1000);
     }
@@ -83,11 +96,12 @@
     this._fakeUploadWithFailedResultFunction = function (counter, defer) {
         let self = this;
         console.log("counter: " + counter);
-        if (counter++ === 4) {
+        self._uploadStatusComponent.updateProgressBar(counter);
+        if (counter++ === 4 || self._isCanceled) {
             defer.reject();
-            self.isUploadInProgress = false;
+            self._isUploadInProgress = false;
+            self._uploadStatusComponent.showStatus(self._isCanceled ? "Canceled" : "Failed");
         }
         else setTimeout(function () { self._fakeUploadWithFailedResultFunction(counter, defer) }, 1000);
     }
-
 }

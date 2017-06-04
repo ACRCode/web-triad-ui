@@ -314,14 +314,14 @@ span.tc-delete-series {
         background-color: #73a0af;
 }
 
-.tc-progress-bar.tc-progress-parsing {
+.tc-progress-bar.tc-upload-progress {
         height: 15px;
         width: 80%;
         margin-left: auto;
         margin-right: auto;
 }
 
-.tc-progress-bar.tc-progress-parsing span {
+.tc-progress-bar.tc-upload-progress span {
         height: 15px;
         width: 0;
 }

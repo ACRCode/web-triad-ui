@@ -1,7 +1,7 @@
 ﻿var UploadQueueHandleService = (function () {
     var uploadItems = [];
     var container;
-    var isUploadInProgress;
+    var isUploadInProgress = null;
     var onUploadCompleted = [];
 
     var Statuses = { Pending: "Pending", InProgress: "InProgress", Completed: "Completed", Failed: "Failed" };
@@ -15,7 +15,8 @@
         },
         addNewTask: function (files) {
 
-            if (isUploadInProgress === null) throw new "Error. UploadQueueService was not initialized before using. Please call method init(_cotainer) to initialize the service.";
+            if (isUploadInProgress === null)
+                throw new "Error. UploadQueueService was not initialized before using. Please call method init(_cotainer) to initialize the service.";
 
             var guidOfFileset = getGuid();
             var uploadTask = new UploadTask(files, guidOfFileset);
@@ -53,7 +54,6 @@
                 uploadItem.status = Statuses.Failed;
             })
             .always(function () {
-                container.find("tr[data-fileset-uid='" + uploadItem.id + "']> td.tc-parsing-progress").html(uploadItem.status);
                 triggerUpload();
             });
     }
