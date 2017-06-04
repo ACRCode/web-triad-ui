@@ -225,6 +225,7 @@ span.tc-anonymization {
     cursor: pointer;  
 }
 
+span.tc-cancel-or-remove-upload-from-queue,
 span.tc-delete-series {
     width: 16px;
     height: 16px;
@@ -233,7 +234,6 @@ span.tc-delete-series {
     cursor: pointer;  
     margin: auto;
 }
-
 
 
 .tc-table-study input[type=checkbox] {

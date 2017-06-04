@@ -1,7 +1,9 @@
 ﻿function UploadTask(files, guidOfFilesSet) {
     this.guidOfFilesSet = guidOfFilesSet;
     this.files = files;
-    this.onRetryRequested = function (guidOfFilesSet){ console.log("Upload retry was requested for " + guidOfFilesSet)};
+    this.isUploadInProgress = false;
+
+    this.onRetryRequested = function (guidOfFilesSet){ console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet)};
 
     this.getHtml = function () {
         let self = this;
@@ -13,8 +15,26 @@
                "</div></td>" +
                "<td style='text-align: center;'>" + self.files.length + "</td>" +
                "<td class='tc-parsing-progress' style='text-align: center;'></td>" +
-               "<td style='text-align: center;'><span class='tc-delete-series' onclick='this._retry();'></span></td>" +
+               "<td style='text-align: center;'><span class='tc-cancel-or-remove-upload-from-queue'></span></td>" +
                "</tr>";
+    }
+
+    this.bindEvents = function (uploadRowElement) {
+        let self = this;
+
+        var removeOrCancelButton = uploadRowElement.find("span.tc-cancel-or-remove-upload-from-queue");
+
+        removeOrCancelButton.click(function () {
+            if (self.isUploadInProgress)
+                console.log("Upload was canceled for " + self.guidOfFilesSet);
+            else uploadRowElement.remove();
+        });
+
+        removeOrCancelButton.focus(function () {
+            console.log("remove or cancel focus");
+            if (self.isUploadInProgress) removeOrCancelButton.attr("title", "Cancel Upload");
+            else removeOrCancelButton.attr("title", "Remove Selection");
+        });
     }
 
     this.execute = function() {
@@ -25,7 +45,8 @@
         return defer.promise();
     }
 
-    this._uploadFilesToServer= function(defer) {
+    this._uploadFilesToServer = function (defer) {
+        this.isUploadInProgress = true;
         this._fakeUploadWithSuccessResultFunction(0, defer);
         //this._fakeUploadWithFailedResultFunction(0, defer);
     }
@@ -47,16 +68,22 @@
     }
 
     this._fakeUploadWithSuccessResultFunction = function (counter, defer) {
-        var self = this;
+        let self = this;
         console.log("counter: " + counter);
-        if (counter++ === 2) defer.resolve("Done");
+        if (counter++ === 4) {
+            defer.resolve("Done");
+            self.isUploadInProgress = false;
+        }
         else setTimeout(function () { self._fakeUploadWithSuccessResultFunction(counter, defer) }, 1000);
     }
 
     this._fakeUploadWithFailedResultFunction = function (counter, defer) {
-        var self = this;
+        let self = this;
         console.log("counter: " + counter);
-        if (counter++ === 2) defer.reject();
+        if (counter++ === 4) {
+            defer.reject();
+            self.isUploadInProgress = false;
+        }
         else setTimeout(function () { self._fakeUploadWithFailedResultFunction(counter, defer) }, 1000);
     }
 
