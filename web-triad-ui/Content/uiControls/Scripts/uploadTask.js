@@ -60,7 +60,16 @@
 
         self._uploadStatusComponent.showProgressBar();
 
-        self._webService.submitFiles(files, [], function(result) { self._handleUploadProgress(result, defer); });
+        var fakeMetadata = [{ "Name": "SiteID", "Value": "1" },
+                            { "Name": "SubjectID", "Value": "testSub" },
+                            { "Name": "SubmissionType", "Value": "ClinicalTrial" },
+                            { "Name": "TimePointDescription", "Value": "" },
+                            { "Name": "TimePointID", "Value": "2" },
+                            { "Name": "ProjectID", "Value": "1" },
+                            { "Name": "GroupID", "Value": "1" },
+                            { "Name": "TrialID", "Value": "1" }];
+
+        self._webService.submitFiles(files, fakeMetadata, function (result) { self._handleUploadProgress(result, defer); });
 
         //self._fakeUploadWithSuccessResultFunction(1, defer);
         //self._fakeUploadWithFailedResultFunction(1, defer);
