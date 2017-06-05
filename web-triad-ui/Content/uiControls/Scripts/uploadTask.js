@@ -1,17 +1,18 @@
-﻿function UploadTask(files, guidOfFilesSet, webService) {
+﻿function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
     let waitingStatusText = "In Queue";
 
     this._guidOfFilesSet = guidOfFilesSet;
     this._files = files;
+    this._uploadParameters = uploadParameters;
+    this._webService = webService;
+
     this._isUploadInProgress = false;
 
     this._uploadStatusComponent;
 
     this._isCanceled = false;
     this._cancelToken = null;
-
-    this._webService = webService;
 
     this._uploadPromise;
 
@@ -68,16 +69,8 @@
 
         self._uploadStatusComponent.showProgressBar();
 
-        var fakeMetadata = [{ "Name": "SiteID", "Value": "1" },
-                            { "Name": "SubjectID", "Value": "testSub" },
-                            { "Name": "SubmissionType", "Value": "ClinicalTrial" },
-                            { "Name": "TimePointDescription", "Value": "" },
-                            { "Name": "TimePointID", "Value": "2" },
-                            { "Name": "ProjectID", "Value": "1" },
-                            { "Name": "GroupID", "Value": "1" },
-                            { "Name": "TrialID", "Value": "1" }];
-
-        self._cancelToken = self._webService.submitFiles(files, fakeMetadata, function (result) { self._handleUploadProgress(result, self._uploadPromise); });
+        self._cancelToken = self._webService.submitFiles(files, self._uploadParameters,
+                                function (result) { self._handleUploadProgress(result, self._uploadPromise); });
 
         //self._fakeUploadWithSuccessResultFunction(1, defer);
         //self._fakeUploadWithFailedResultFunction(1, defer);

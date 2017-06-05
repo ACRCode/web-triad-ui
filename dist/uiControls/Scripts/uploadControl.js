@@ -72,7 +72,14 @@
         addFiles: function (files) {
             let self = this;
             self.element.find(".tc-parsingPanel").show();
-            UploadQueueHandleService.addNewTask(files);
+
+            var typeSubmitData = {
+                                   Name: "TypeOfSubmit",
+                                   Value: TypeOfSubmit.CreateSubmissionPackage
+                                 };
+            var uploadParameters = self.options.uploadData.concat(typeSubmitData);
+
+            UploadQueueHandleService.addNewTask(files, uploadParameters);
         },
 
         /////////////////////////////////////////////////////////////////////////

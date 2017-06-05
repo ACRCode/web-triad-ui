@@ -15,13 +15,13 @@
             container = _container;
             webService = _webService;
         },
-        addNewTask: function (files) {
+        addNewTask: function (files, uploadParameters) {
 
             if (isUploadInProgress === null || webService === null)
                 throw new "Error. UploadQueueService was not initialized before using. Please call method init to initialize the service.";
 
             var guidOfFileset = getGuid();
-            var uploadTask = new UploadTask(files, guidOfFileset, webService);
+            var uploadTask = new UploadTask(files, guidOfFileset, uploadParameters, webService);
 
             var newUploadItem = { id: guidOfFileset, task: uploadTask, status: Statuses.Pending };
             uploadItems.push(newUploadItem);
