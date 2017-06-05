@@ -1,16 +1,22 @@
 ﻿function UploadTask(files, guidOfFilesSet, webService) {
-    
+
     let waitingStatusText = "In Queue";
 
     this._guidOfFilesSet = guidOfFilesSet;
     this._files = files;
     this._isUploadInProgress = false;
-    this._uploadStatusComponent;
-    this._isCanceled = false;
-    this._webService = webService;
-    
 
-    this.onRetryRequested = function (guidOfFilesSet){ console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet)};
+    this._uploadStatusComponent;
+
+    this._isCanceled = false;
+    this._cancelToken = null;
+
+    this._webService = webService;
+
+    this._uploadPromise;
+
+
+    this.onRetryRequested = function (guidOfFilesSet) { console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet) };
 
     this.getHtml = function () {
         let self = this;
@@ -45,15 +51,17 @@
         self._uploadStatusComponent.showStatus(waitingStatusText);
     }
 
-    this.execute = function() {
-        var defer = $.Deferred();
+    this.execute = function () {
+        let self = this;
 
-        this._uploadFilesToServer(defer);
+        self._uploadPromise = $.Deferred();
 
-        return defer.promise();
+        self._uploadFilesToServer();
+
+        return self._uploadPromise.promise();
     }
 
-    this._uploadFilesToServer = function (defer) {
+    this._uploadFilesToServer = function () {
         let self = this;
 
         self._isUploadInProgress = true;
@@ -69,7 +77,7 @@
                             { "Name": "GroupID", "Value": "1" },
                             { "Name": "TrialID", "Value": "1" }];
 
-        self._webService.submitFiles(files, fakeMetadata, function (result) { self._handleUploadProgress(result, defer); });
+        self._cancelToken = self._webService.submitFiles(files, fakeMetadata, function (result) { self._handleUploadProgress(result, self._uploadPromise); });
 
         //self._fakeUploadWithSuccessResultFunction(1, defer);
         //self._fakeUploadWithFailedResultFunction(1, defer);
@@ -77,8 +85,16 @@
 
     this._cancelUpload = function () {
         let self = this;
+
         self._isCanceled = true;
-        console.log("Upload was canceled for " + self._guidOfFilesSet);
+        self._isUploadInProgress = false;
+
+        self._uploadPromise.resolve();
+
+        self._webService.cancelUploadAndSubmitListOfFiles(self._cancelToken,
+            function () { console.log("File within upload with id = " + self._cancelToken + " was removed."); });
+
+        self._uploadStatusComponent.showStatusWithRetryButton("Canceled", function () { self._retry(self); });
     }
 
     this._retry = function (self) {
@@ -98,14 +114,14 @@
 
         return filesNames;
     }
-    
-    this._handleUploadProgress = function(result, defer) {
+
+    this._handleUploadProgress = function (result, defer) {
         let self = this;
 
         switch (result.status) {
             case ProcessStatus.Success:
                 self._uploadStatusComponent.updateProgressBar(result.progress);
-                self._uploadStatusComponent.showStatus("Completed");
+                if (result.message != "CancelSubmit") self._uploadStatusComponent.showStatus("Completed");
                 self._isUploadInProgress = false;
                 defer.resolve();
                 break;
@@ -128,7 +144,7 @@
         if (counter++ === 4 || self._isCanceled) {
             defer.resolve("Done");
             self._isUploadInProgress = false;
-            if (self._isCanceled) self._uploadStatusComponent.showStatusWithRetryButton("Canceled", function() { self._retry(self); });
+            if (self._isCanceled) self._uploadStatusComponent.showStatusWithRetryButton("Canceled", function () { self._retry(self); });
             else self._uploadStatusComponent.showStatus("Completed");
         }
         else setTimeout(function () { self._fakeUploadWithSuccessResultFunction(counter, defer) }, 1000);
