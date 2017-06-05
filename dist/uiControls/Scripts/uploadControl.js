@@ -15,6 +15,9 @@
                 console.log("getSecurityToken() not implemented");
                 return null;
             },
+            onFilesUploaded: function () {
+                console.log("On updated event handler was not added.");
+            },
             securityToken: null
         },
         
@@ -55,7 +58,7 @@
             self.setSecurityToken(token);
 
             UploadQueueHandleService.init(self._service, this.element.find(".tc-parsingPanel tbody"));
-            UploadQueueHandleService.addOnUploadCompletedHandler(this._fakeUpdate);
+            UploadQueueHandleService.addOnUploadCompletedHandler(function () { self._update(self); });
         },
 
         /////////////////////////////////////////////////////////////////////////
@@ -74,9 +77,8 @@
 
         /////////////////////////////////////////////////////////////////////////
 
-        _fakeUpdate: function () {
-            console.log("update review after upload completion");
-            $("div.tc-wrapper").show().append("Review update!");
+        _update: function (self) {
+            self.options.onFilesUploaded();
         },
 
      /*   _update: function () {
@@ -435,23 +437,6 @@
                 "</tr></thead>" +
                 "<tbody></tbody>" +
                 "</table>" +
-                "</div>" +
-                "<div class='tc-wrapper tc-upload' style='display: none'>" +
-                "<table class='tc-table-study'>" +
-                "<caption>Files ready for upload</caption>" +
-                "<thead><tr>" +
-                "<th></th>" +
-                "<th>DICOM Study ID</th>" +
-                "<th>Study Description</th>" +
-                "<th style='width: 200px; text-align: center'>Study Date</th>" +
-                "<th style='width: 200px; text-align: center'>Study Size</th>" +
-                "<th style='width: 100px; text-align: center'>Anonymization</th>" +
-                "<th style='width: 200px; text-align: center' class='tc-action-th'>Actions</th>" +
-                "</tr></thead>" +
-                "<tbody></tbody>" +
-                "</table>" +
-                "<button type='button' id='uploadAll' class='tc-btn'>" +
-                "<span class='tc-btn-icon'></span>Upload All</button>" +
                 "</div>"
 /*
         _series_T:
