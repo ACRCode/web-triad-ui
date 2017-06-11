@@ -41,11 +41,11 @@
         },
 
         _create: function () {
-           /* this._studies = {};
-            this._filesProcessing = {};
-            this._studiesUploading = {};
-            this._dictionaryStateOfCollapse = {};
-            this._checkAvailabilityStatusAddingFiles();*/
+            /* this._studies = {};
+             this._filesProcessing = {};
+             this._studiesUploading = {};
+             this._dictionaryStateOfCollapse = {};
+             this._checkAvailabilityStatusAddingFiles();*/
 
             let self = this;
 
@@ -57,8 +57,10 @@
             var token = self.options.getSecurityToken();
             self.setSecurityToken(token);
 
-            UploadQueueHandleService.init(self._service, this.element.find(".tc-parsingPanel tbody"));
+            var parsingPanel = this.element.find(".tc-uploadingPanel");
+            UploadQueueHandleService.init(self._service, parsingPanel.find("tbody"));
             UploadQueueHandleService.addOnUploadCompletedHandler(function () { self._update(self); });
+            UploadQueueHandleService.addOnQueueEmptiedHandler(function () { parsingPanel.hide(); });
         },
 
         /////////////////////////////////////////////////////////////////////////
@@ -71,7 +73,7 @@
 
         addFiles: function (files) {
             let self = this;
-            self.element.find(".tc-parsingPanel").show();
+            self.element.find(".tc-uploadingPanel").show();
 
             var typeSubmitData = {
                                    Name: "TypeOfSubmit",
@@ -434,8 +436,8 @@
         /////////////////////////////////////////////////////////////////////////
 
         _studies_T:
-            "<div class='tc-parsingPanel' style='display: none'>" +
-                "<table class='tc-table-parsingPanel'>" +
+            "<div class='tc-uploadingPanel' style='display: none'>" +
+                "<table class='tc-table-uploadingPanel'>" +
                 "<thead><tr>" +
                 "<th style='padding-left: 15px;'>Files</th>" +
                 "<th style='width: 100px; text-align: center'># of Files</th>" +

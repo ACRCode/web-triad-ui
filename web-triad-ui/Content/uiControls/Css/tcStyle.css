@@ -267,7 +267,7 @@ span.tc-delete-series {
     background-color: #f9f9f9;
 }
 
-.tc-table-parsingPanel {
+.tc-table-uploadingPanel {
     font-size: 14px;
     color: #666666;
     text-align: left;
@@ -277,28 +277,28 @@ span.tc-delete-series {
 }
 
 
-.tc-table-parsingPanel > thead {
+.tc-table-uploadingPanel > thead {
     background-color: #deecd4;
-    line-height: 1.3;
+    line-height: 2.0;
     font-family: MyriadProSemiBold;
     white-space: nowrap;
 }
 
-.tc-table-parsingPanel > tbody {
+.tc-table-uploadingPanel > tbody {
     background-color: #e6e6e6;  
     line-height: 2.6;
     font-family: MyriadProRegular;
 }
 
-.tc-table-parsingPanel td,
-.tc-table-parsingPanel th {
+.tc-table-uploadingPanel td,
+.tc-table-uploadingPanel th {
     border-right: 1px solid white;
 }
 
-.tc-table-parsingPanel > tbody > tr:nth-child(2n+2) {
+.tc-table-uploadingPanel > tbody > tr:nth-child(2n+2) {
     background-color: #f5f5f5;
 }
-.tc-table-parsingPanel > tbody > tr:nth-child(2n+1) {
+.tc-table-uploadingPanel > tbody > tr:nth-child(2n+1) {
     background-color: #e6e6e6;
 }
 

@@ -3,6 +3,7 @@
     var container;
     var isUploadInProgress = null;
     var onUploadCompleted = [];
+    var onQueueEmptied = [];
     var webService = null;
 
     var Statuses = { Pending: "Pending", InProgress: "InProgress", Completed: "Completed", Failed: "Failed" };
@@ -27,7 +28,14 @@
             uploadItems.push(newUploadItem);
 
             container.append(uploadTask.getHtml());
-            uploadTask.bindEvents(container.find("tr[data-fileset-uid='" + newUploadItem.id + "']"));
+
+            var uploadRowElment = container.find("tr[data-fileset-uid='" + newUploadItem.id + "']");
+            uploadRowElment.on("remove", function () {
+                if (container.find("tr").length <= 1)
+                    onQueueEmptied.forEach(function (func) { func(); });
+            });
+
+            uploadTask.bindEvents(uploadRowElment);
 
             uploadTask.onRetryRequested = retryUpload;
 
@@ -35,6 +43,9 @@
         },
         addOnUploadCompletedHandler: function(onUploadCompletedFunc) {
             onUploadCompleted.push(onUploadCompletedFunc);
+        },
+        addOnQueueEmptiedHandler: function (onQueueEmptiedFunc) {
+            onQueueEmptied.push(onQueueEmptiedFunc);
         }
     }
 
