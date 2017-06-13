@@ -59,7 +59,8 @@
 
             var parsingPanel = this.element.find(".tc-uploadingPanel");
             UploadQueueHandleService.init(self._service, parsingPanel.find("tbody"));
-            UploadQueueHandleService.addOnUploadCompletedHandler(function () { self._update(self, result); });
+            UploadQueueHandleService.addOnUploadCompletedHandler(function (result) { self._update(self, result);
+        });
             UploadQueueHandleService.addOnQueueEmptiedHandler(function () { parsingPanel.hide(); });
         },
 
