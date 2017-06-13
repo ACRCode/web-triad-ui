@@ -100,6 +100,14 @@
     background-color: white;
 }
 
+.tc-table-study > thead > tr > th:last-child {
+    border-right: 2px solid #73a0af;
+}
+
+.tc-table-study > tbody > tr > td:last-child {
+    border-right: 2px solid #73a0af;
+}
+
 .tc-table-study > caption {
     text-align: left;
     font-family: MyriadProSemiBold;
