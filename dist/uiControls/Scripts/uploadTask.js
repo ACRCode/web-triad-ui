@@ -16,6 +16,7 @@
 
     this._uploadPromise;
 
+    this._skippedFiles = [];
 
     this.onRetryRequested = function (guidOfFilesSet) { console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet) };
 
@@ -81,6 +82,7 @@
 
         self._isCanceled = true;
         self._isUploadInProgress = false;
+        self._skippedFiles = [];
 
         self._uploadPromise.resolve();
 
@@ -91,6 +93,8 @@
     }
 
     this._retry = function (self) {
+
+        self._skippedFiles = [];
         self._isCanceled = false;
         self._uploadStatusComponent.showStatus(waitingStatusText);
         self.onRetryRequested(self._guidOfFilesSet);
@@ -111,12 +115,16 @@
     this._handleUploadProgress = function (result, defer) {
         let self = this;
 
+        if (result.hasOwnProperty("skippedFiles")) {
+            self._skippedFiles = self._skippedFiles.concat(result.skippedFiles);
+        }
+
         switch (result.status) {
             case ProcessStatus.Success:
                 self._uploadStatusComponent.updateProgressBar(result.progress);
                 if (result.message != "CancelSubmit") self._uploadStatusComponent.showStatus("Completed");
                 self._isUploadInProgress = false;
-                defer.resolve();
+                defer.resolve(self._skippedFiles);
                 break;
             case ProcessStatus.InProgress:
                 self._uploadStatusComponent.updateProgressBar(result.progress);

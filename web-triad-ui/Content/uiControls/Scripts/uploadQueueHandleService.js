@@ -61,9 +61,9 @@
 
         var taskExecutionPromise = uploadItem.task.execute();
         $.when(taskExecutionPromise)
-            .done(function () {
+            .done(function (result) {
                 uploadItem.status = Statuses.Completed;
-                onUploadCompleted.forEach(function (func) { func(); });
+                onUploadCompleted.forEach(function (func) { func(result); });
             })
             .fail(function () {
                 uploadItem.status = Statuses.Failed;

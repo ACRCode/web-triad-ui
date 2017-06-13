@@ -91,7 +91,6 @@
     <Content Include="Content\uiControls\Images\retry.png" />
     <Content Include="Content\uiControls\Images\upload-btn.png" />
     <Content Include="Content\uiControls\Images\upload.png" />
-    <Content Include="Content\uiControls\Scripts\dicomApi.js" />
     <Content Include="Content\uiControls\Scripts\reviewControl.js" />
     <Content Include="Content\uiControls\Scripts\uploadControl.js" />
     <Content Include="Content\uiControls\Scripts\uploadQueueHandleService.js" />
