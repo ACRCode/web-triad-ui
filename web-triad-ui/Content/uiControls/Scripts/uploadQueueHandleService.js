@@ -109,7 +109,7 @@ var UploadQueueHandleService = (function () {
     }
 
     function pendingTaskPredicate(task) {
-        return task.status === Statuses.Pending;
+        return task.status == Statuses.Pending;
     }
 
     function getGuid() {
