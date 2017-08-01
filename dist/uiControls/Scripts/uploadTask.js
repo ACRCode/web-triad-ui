@@ -1,4 +1,28 @@
-﻿function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
+﻿//polyfill Array.prototype.findIndex
+if (!Array.prototype.findIndex) {
+    Array.prototype.findIndex = function (predicate) {
+        if (this == null) {
+            throw new TypeError('Array.prototype.findIndex called on null or undefined');
+        }
+        if (typeof predicate !== 'function') {
+            throw new TypeError('predicate must be a function');
+        }
+        var list = Object(this);
+        var length = list.length >>> 0;
+        var thisArg = arguments[1];
+        var value;
+
+        for (var i = 0; i < length; i++) {
+            value = list[i];
+            if (predicate.call(thisArg, value, i, list)) {
+                return i;
+            }
+        }
+        return -1;
+    };
+}
+
+function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
     let waitingStatusText = "In Queue";
 
@@ -16,7 +40,13 @@
 
     this._uploadPromise;
 
-    this._skippedFiles = [];
+    this._skippedFiles = {
+        NumberOfStudies: 0,
+        NumberOfDicoms: 0,
+        NumberOfNonDicoms: 0,
+        TotalFileCount: 0,
+        Studies: []
+    };
 
     this.onRetryRequested = function (guidOfFilesSet) { console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet) };
 
@@ -25,13 +55,13 @@
 
         var fileNames = self._getFileNames();
         return "<tr data-fileset-uid='" + self._guidOfFilesSet + "'>" +
-               "<td style='padding-left: 15px;'><div style='text-overflow: ellipsis;overflow: hidden;width: 300px;white-space: nowrap;'>" +
-               fileNames +
-               "</div></td>" +
-               "<td style='text-align: center;'>" + self._files.length + "</td>" +
-               "<td class='tc-upload-status' style='text-align: center;'></td>" +
-               "<td style='text-align: center;'><span title='' class='tc-cancel-or-remove-upload-from-queue'></span></td>" +
-               "</tr>";
+            "<td style='padding-left: 15px;'><div style='text-overflow: ellipsis;overflow: hidden;width: 300px;white-space: nowrap;'>" +
+            fileNames +
+            "</div></td>" +
+            "<td style='text-align: center;'>" + self._files.length + "</td>" +
+            "<td class='tc-upload-status' style='text-align: center;'></td>" +
+            "<td style='text-align: center;'><span title='' class='tc-cancel-or-remove-upload-from-queue'></span></td>" +
+            "</tr>";
     }
 
     this.bindEvents = function (uploadRowElement) {
@@ -71,7 +101,7 @@
         self._uploadStatusComponent.showProgressBar();
 
         self._cancelToken = self._webService.submitFiles(files, self._uploadParameters,
-                                function (result) { self._handleUploadProgress(result, self._uploadPromise); });
+            function (result) { self._handleUploadProgress(result, self._uploadPromise); });
 
         //self._fakeUploadWithSuccessResultFunction(1, defer);
         //self._fakeUploadWithFailedResultFunction(1, defer);
@@ -82,7 +112,13 @@
 
         self._isCanceled = true;
         self._isUploadInProgress = false;
-        self._skippedFiles = [];
+        self._skippedFiles = {
+            NumberOfStudies: 0,
+            NumberOfDicoms: 0,
+            NumberOfNonDicoms: 0,
+            TotalFileCount: 0,
+            Studies: []
+        };
 
         self._uploadPromise.resolve();
 
@@ -93,8 +129,13 @@
     }
 
     this._retry = function (self) {
-
-        self._skippedFiles = [];
+        self._skippedFiles = {
+            NumberOfStudies: 0,
+            NumberOfDicoms: 0,
+            NumberOfNonDicoms: 0,
+            TotalFileCount: 0,
+            Studies: []
+        };
         self._isCanceled = false;
         self._uploadStatusComponent.showStatus(waitingStatusText);
         self.onRetryRequested(self._guidOfFilesSet);
@@ -116,25 +157,25 @@
         let self = this;
 
         if (result.hasOwnProperty("skippedFiles")) {
-            self._skippedFiles = self._skippedFiles.concat(result.skippedFiles);
+            self._addSkippedFiles(result.skippedFiles);
         }
 
         switch (result.status) {
-            case ProcessStatus.Success:
-                self._uploadStatusComponent.updateProgressBar(result.progress);
-                if (result.message != "CancelSubmit") self._uploadStatusComponent.showStatus("Completed");
-                self._isUploadInProgress = false;
-                defer.resolve(self._skippedFiles);
-                break;
-            case ProcessStatus.InProgress:
-                self._uploadStatusComponent.updateProgressBar(result.progress);
-                break;
-            case ProcessStatus.Error:
-                self._isUploadInProgress = false;
-                self._uploadStatusComponent.showStatusWithRetryButton("Failed", function () { self._retry(self); });
-                defer.reject();
-                break;
-            default:
+        case ProcessStatus.Success:
+            self._uploadStatusComponent.updateProgressBar(result.progress);
+            if (result.message != "CancelSubmit") self._uploadStatusComponent.showStatus("Completed");
+            self._isUploadInProgress = false;
+            defer.resolve(self._skippedFiles);
+            break;
+        case ProcessStatus.InProgress:
+            self._uploadStatusComponent.updateProgressBar(result.progress);
+            break;
+        case ProcessStatus.Error:
+            self._isUploadInProgress = false;
+            self._uploadStatusComponent.showStatusWithRetryButton("Failed", function () { self._retry(self); });
+            defer.reject();
+            break;
+        default:
         }
     }
 
@@ -162,5 +203,57 @@
             else self._uploadStatusComponent.showStatus("Failed");
         }
         else setTimeout(function () { self._fakeUploadWithFailedResultFunction(counter, defer) }, 1000);
+    }
+
+
+    this._addSkippedFiles = function (skippedFiles) {
+        let self = this;
+
+        for (var i = 0; i < skippedFiles.length; i++) {
+            if (skippedFiles[i].IsDicom == true) {
+                self._skippedFiles.NumberOfDicoms++;
+                self._skippedFiles.TotalFileCount++;
+
+                var index = self._skippedFiles.Studies.findIndex(function (item) {
+                    return item.StudyInstanceUID == skippedFiles[i].StudyInstanceUID;
+                });
+                if (index == -1) {
+                    self._skippedFiles.NumberOfStudies++;
+                    self._skippedFiles.Studies.push(
+                        {
+                            StudyInstanceUID: skippedFiles[i].StudyInstanceUID,
+                            StudyDescription: skippedFiles[i].StudyDescription,
+                            NumberOfFiles: 1,
+                            NumberOfSeries: 1,
+                            Series: [{
+                                NumberOfFiles: 1,
+                                SeriesInstanceUID: skippedFiles[i].SeriesInstanceUID,
+                                SeriesDescription: skippedFiles[i].SeriesDescription
+                            }]
+                        }
+                    );
+
+                } else {
+                    self._skippedFiles.Studies[index].NumberOfFiles++;
+                    var indexOfSeries = self._skippedFiles.Studies[index].Series.findIndex(function (item) {
+                        return item.SeriesInstanceUID == skippedFiles[i].SeriesInstanceUID;
+                    });
+                    if (indexOfSeries == -1) {
+                        self._skippedFiles.Studies[index].NumberOfSeries++;
+                        self._skippedFiles.Studies[index].Series.push(
+                            {
+                                NumberOfFiles: 1,
+                                SeriesInstanceUID: skippedFiles[i].SeriesInstanceUID,
+                                SeriesDescription: skippedFiles[i].SeriesDescription
+                            });
+                    } else {
+                        self._skippedFiles.Studies[index].Series[indexOfSeries].NumberOfFiles++;
+                    }
+                }
+            } else {
+                self._skippedFiles.NumberOfNonDicoms++;
+                self._skippedFiles.TotalFileCount++;
+            }
+        };
     }
 }
