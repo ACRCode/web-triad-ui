@@ -120,7 +120,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
             Studies: []
         };
 
-        self._uploadPromise.resolve();
+        self._uploadPromise.reject();
 
         self._webService.cancelUploadAndSubmitListOfFiles(self._cancelToken,
             function () { console.log("File within upload with id = " + self._cancelToken + " was removed."); });

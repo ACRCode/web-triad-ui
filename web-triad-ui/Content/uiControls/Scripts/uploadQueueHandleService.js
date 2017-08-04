@@ -70,6 +70,11 @@ var UploadQueueHandleService = (function () {
         },
         addOnQueueEmptiedHandler: function (onQueueEmptiedFunc) {
             onQueueEmptied.push(onQueueEmptiedFunc);
+        },
+        getProcessingStaus: function () {
+            if (isUploadInProgress === null || webService === null)
+                throw new "Error. UploadQueueService was not initialized before using. Please call method init to initialize the service.";
+            return isUploadInProgress;
         }
     }
 

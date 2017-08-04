@@ -73,6 +73,7 @@
         /////////////////////////////////////////////////////////////////////////
 
         addFiles: function (files) {
+            if (files.length == 0) return;
             let self = this;
             self.element.find(".tc-uploadingPanel").show();
 
@@ -83,6 +84,12 @@
             var uploadParameters = self.options.uploadData.concat(typeSubmitData);
 
             UploadQueueHandleService.addNewTask(files, uploadParameters);
+        },
+
+        /////////////////////////////////////////////////////////////////////////
+
+        getProcessingStatus: function () {
+            return UploadQueueHandleService.getProcessingStaus();
         },
 
         /////////////////////////////////////////////////////////////////////////
