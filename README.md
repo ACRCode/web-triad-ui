@@ -32,12 +32,13 @@ Include jQuery, jQueryUI scripts and following files on the page
 ```sh
 <script src="~/*your folder*/uiControls/Scripts/webTriadService.js"></script>
 <script src="~/*your folder*/uiControls/Scripts/reviewControl.js"></script>
+
 <link rel="stylesheet" href="~/*your folder*/uiControls/Css/tcStyle.css">
 ```
 
 Create ui-control for any jquery element and assign the necessary business parameters
 to *reviewData* variable and define function *'getSecurityToken'* which will be called 
-for receiving a token before each sending a request for the server.
+for receiving a token before each sending a request to the server.
 
 ```sh
 var control = $("#reviewControl").reviewerSubmittedFiles({
@@ -62,9 +63,8 @@ control.reviewerSubmittedFiles("update", {
           });
 ```
 
-For setting new token it is necessary to call following method 
-(when using this method, you must either not define *'getSecurityToken'* function 
-or that *'getSecurityToken'* returns null) 
+To set a new token once for all requests it is necessary to call following method 
+(when using this method, you must either not define *'getSecurityToken'* function or to be ensure that *'getSecurityToken'* returns null) 
 
 ```sh
 control.reviewerSubmittedFiles("setSecurityToken", token);
@@ -74,16 +74,17 @@ control.reviewerSubmittedFiles("setSecurityToken", token);
 Include jQuery, jQueryUI scripts and following files on the page
 
 ```sh
-<script src="~/Content/uiControls/Scripts/dicomApi.js"></script>
 <script src="~/Content/uiControls/Scripts/webTriadService.js"></script>
+<script src="~/Content/uiControls/Scripts/uploadStatusComponent.js"></script>
+<script src="~/Content/uiControls/Scripts/uploadTask.js"></script>
+<script src="~/Content/uiControls/Scripts/uploadQueueHandleService.js"></script>
 <script src="~/Content/uiControls/Scripts/uploadControl.js"></script>
+
 <link rel="stylesheet" href="~/Content/uiControls/Css/tcStyle.css">
 ```
 
 Create ui-control for any jquery element, assign the necessary business parameters
-to *uploadData* variable, define function *'setAvailabilityStatusAddingFiles'* which will be called 
-when the possibility of addition of new files for uploading is changed, 
-and define function *'getSecurityToken'* which will be called 
+to *uploadData* variable and define function *'getSecurityToken'* which will be called 
 for receiving a token before each sending a request for the server.
 
 ```sh
@@ -104,9 +105,8 @@ For adding of files for uploading to call following method
 control.uploaderFiles("addFiles", files);
 ```
 
-For setting new token it is necessary to call following method 
-(when using this method, you must either not define *'getSecurityToken'* function 
-or that *'getSecurityToken'* returns null) 
+To set a new token once for all requests it is necessary to call following method 
+(when using this method, you must either not define *'getSecurityToken'* function or to be ensure that *'getSecurityToken'* returns null) 
 
 ```sh
 control.uploaderFiles("setSecurityToken", token);

@@ -441,3 +441,60 @@ span.tc-delete-series {
 .tc-btn.tc-not-allowed {
     opacity: .65;
 }  
+
+/*dialog*/
+.ui-state-disabled {
+    cursor: default !important;
+    pointer-events: none;
+}
+
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}
+
+.ui-dialog {
+    position: absolute;
+    top: 0;
+    left: 0;
+    outline: 0;
+    border: 2px solid #73a0af;
+    background-color: white;
+}
+
+.ui-dialog .ui-dialog-content {
+    position: relative;
+    border: 0;
+    padding: .5em 1em;
+    background: none;
+    overflow: auto;
+    background-color: white;
+    min-height: 0 !important;
+}
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+    float: right;
+}
+.ui-dialog .ui-dialog-buttonpane button {
+    margin: .5em .4em .5em 0;
+    cursor: pointer;
+}
+.ui-draggable .ui-dialog-titlebar {
+    cursor: move;
+    background-color: #73a0af;
+}
+
+.ui-dialog p {
+    margin: 0;
+}
+
+.ui-widget-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.ui-front {
+    z-index: 100;
+}
+/*end dialog*/
