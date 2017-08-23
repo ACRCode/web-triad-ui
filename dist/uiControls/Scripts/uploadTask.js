@@ -59,7 +59,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
             fileNames +
             "</div></td>" +
             "<td style='text-align: center;'>" + self._files.length + "</td>" +
-            "<td class='tc-upload-status' style='text-align: center;'></td>" +
+            "<td class='tc-upload-status' style='text-align: center;'><p></p></td>" +
             "<td style='text-align: center;'><span title='' class='tc-cancel-or-remove-upload-from-queue'></span></td>" +
             "</tr>";
     }
@@ -79,7 +79,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
             else removeOrCancelButton.attr("title", "Remove Selection");
         });
 
-        self._uploadStatusComponent = new UploadStatusComponent(uploadRowElement.find("td.tc-upload-status"));
+        self._uploadStatusComponent = new UploadStatusComponent(uploadRowElement.find("td.tc-upload-status>p"));
         self._uploadStatusComponent.showStatus(waitingStatusText);
     }
 
@@ -163,7 +163,11 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
         switch (result.status) {
         case ProcessStatus.Success:
             self._uploadStatusComponent.updateProgressBar(result.progress);
-            if (result.message != "CancelSubmit") self._uploadStatusComponent.showStatus("Completed");
+            if (result.message != "CancelSubmit") {
+                var statusString = self._files.length - self._skippedFiles.TotalFileCount + " file(s) uploaded successfully. ";
+                if (self._skippedFiles.TotalFileCount != 0) statusString += self._skippedFiles.TotalFileCount + " file(s) rejected to upload";
+                self._uploadStatusComponent.showStatus(statusString);
+            }
             self._isUploadInProgress = false;
             defer.resolve(self._skippedFiles);
             break;
