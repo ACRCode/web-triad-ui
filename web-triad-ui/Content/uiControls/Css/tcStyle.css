@@ -342,9 +342,15 @@ span.tc-delete-series {
     margin-right: auto;
 }
 
-.tc-progress-bar.tc-upload-progress span {
+.tc-progress-bar.tc-upload-progress > .tc-upload-progress-bar {
     height: 15px;
     width: 0;
+}
+
+.tc-progress-bar.tc-upload-progress > .tc-upload-progress-val {
+    height: 0;
+    line-height: 1.2;
+    color: #4d4d4d;
 }
 
 .tc-progress-bar.tc-progress-uploading {
