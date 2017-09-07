@@ -64,7 +64,7 @@
                 $.when(self._getStudiesDetailsDef()).then(function (data) {
 
                     if (data.length === 0) {
-                        //self.element.html("no files");
+                        self.element.html("");
                         return;
                     }
 
