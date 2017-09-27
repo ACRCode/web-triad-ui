@@ -43,6 +43,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
     this._skippedFiles = {
         NumberOfStudies: 0,
         NumberOfDicoms: 0,
+        NumberOfCorruptedDicoms: 0,
         NumberOfNonDicoms: 0,
         TotalFileCount: 0,
         Studies: []
@@ -115,6 +116,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
         self._skippedFiles = {
             NumberOfStudies: 0,
             NumberOfDicoms: 0,
+            NumberOfCorruptedDicoms: 0,
             NumberOfNonDicoms: 0,
             TotalFileCount: 0,
             Studies: []
@@ -132,6 +134,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
         self._skippedFiles = {
             NumberOfStudies: 0,
             NumberOfDicoms: 0,
+            NumberOfCorruptedDicoms: 0,
             NumberOfNonDicoms: 0,
             TotalFileCount: 0,
             Studies: []
@@ -215,8 +218,15 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
         for (var i = 0; i < skippedFiles.length; i++) {
             if (skippedFiles[i].IsDicom == true) {
-                self._skippedFiles.NumberOfDicoms++;
+
                 self._skippedFiles.TotalFileCount++;
+
+                if (skippedFiles[i].IsCorrectDicom == false) {
+                    self._skippedFiles.NumberOfCorruptedDicoms++;
+                    continue;
+                }
+
+                self._skippedFiles.NumberOfDicoms++;
 
                 var index = self._skippedFiles.Studies.findIndex(function (item) {
                     return item.StudyInstanceUID == skippedFiles[i].StudyInstanceUID;
