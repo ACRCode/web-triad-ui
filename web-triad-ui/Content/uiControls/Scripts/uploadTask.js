@@ -40,14 +40,14 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
     this._uploadPromise;
 
-    this._skippedFiles = {
-        NumberOfStudies: 0,
-        NumberOfDicoms: 0,
-        NumberOfCorruptedDicoms: 0,
-        NumberOfNonDicoms: 0,
-        TotalFileCount: 0,
-        Studies: []
-    };
+    //this._skippedFiles = {
+    //    NumberOfStudies: 0,
+    //    NumberOfDicoms: 0,
+    //    NumberOfCorruptedDicoms: 0,
+    //    NumberOfNonDicoms: 0,
+    //    TotalFileCount: 0,
+    //    Studies: []
+    //};
 
     this.onRetryRequested = function (guidOfFilesSet) { console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet) };
 
@@ -113,14 +113,14 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
         self._isCanceled = true;
         self._isUploadInProgress = false;
-        self._skippedFiles = {
-            NumberOfStudies: 0,
-            NumberOfDicoms: 0,
-            NumberOfCorruptedDicoms: 0,
-            NumberOfNonDicoms: 0,
-            TotalFileCount: 0,
-            Studies: []
-        };
+        //self._skippedFiles = {
+        //    NumberOfStudies: 0,
+        //    NumberOfDicoms: 0,
+        //    NumberOfCorruptedDicoms: 0,
+        //    NumberOfNonDicoms: 0,
+        //    TotalFileCount: 0,
+        //    Studies: []
+        //};
 
         self._uploadPromise.reject();
 
@@ -131,14 +131,14 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
     }
 
     this._retry = function (self) {
-        self._skippedFiles = {
-            NumberOfStudies: 0,
-            NumberOfDicoms: 0,
-            NumberOfCorruptedDicoms: 0,
-            NumberOfNonDicoms: 0,
-            TotalFileCount: 0,
-            Studies: []
-        };
+        //self._skippedFiles = {
+        //    NumberOfStudies: 0,
+        //    NumberOfDicoms: 0,
+        //    NumberOfCorruptedDicoms: 0,
+        //    NumberOfNonDicoms: 0,
+        //    TotalFileCount: 0,
+        //    Studies: []
+        //};
         self._isCanceled = false;
         self._uploadStatusComponent.showStatus(waitingStatusText);
         self.onRetryRequested(self._guidOfFilesSet);
@@ -159,20 +159,18 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
     this._handleUploadProgress = function (result, defer) {
         let self = this;
 
-        if (result.hasOwnProperty("skippedFiles")) {
-            self._addSkippedFiles(result.skippedFiles);
-        }
-
-        switch (result.status) {
+        switch (result.processStatus) {
         case ProcessStatus.Success:
             self._uploadStatusComponent.updateProgressBar(result.progress);
             if (result.message != "CancelSubmit") {
-                var statusString = self._files.length - self._skippedFiles.TotalFileCount + " file(s) uploaded successfully. ";
-                if (self._skippedFiles.TotalFileCount != 0) statusString += self._skippedFiles.TotalFileCount + " file(s) rejected to upload";
-                self._uploadStatusComponent.showStatus(statusString);
+                //var statusString = self._files.length - self._skippedFiles.TotalFileCount + " file(s) uploaded successfully. ";
+                //if (self._skippedFiles.TotalFileCount != 0) statusString += self._skippedFiles.TotalFileCount + " file(s) rejected to upload";
+                //self._uploadStatusComponent.showStatus(statusString);
+                self._uploadStatusComponent.showStatus("Files uploaded successfully");
             }
             self._isUploadInProgress = false;
-            defer.resolve(self._skippedFiles);
+            //defer.resolve(self._skippedFiles);
+            defer.resolve();
             break;
         case ProcessStatus.InProgress:
             self._uploadStatusComponent.updateProgressBar(result.progress);
