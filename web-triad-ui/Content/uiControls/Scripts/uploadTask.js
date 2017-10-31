@@ -161,12 +161,21 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
         switch (result.processStatus) {
         case ProcessStatus.Success:
+            if (result.processStep == ProcessStep.Submitting) {
+                self._uploadStatusComponent.showStatusWithSpinner("Processing files..");
+                break;
+            }
+            if (result.processStep == ProcessStep.Processing) {
+                self._uploadStatusComponent.showStatus("Files uploaded successfully");
+                break;
+            }
             self._uploadStatusComponent.updateProgressBar(result.progress);
             if (result.message != "CancelSubmit") {
                 //var statusString = self._files.length - self._skippedFiles.TotalFileCount + " file(s) uploaded successfully. ";
                 //if (self._skippedFiles.TotalFileCount != 0) statusString += self._skippedFiles.TotalFileCount + " file(s) rejected to upload";
                 //self._uploadStatusComponent.showStatus(statusString);
-                self._uploadStatusComponent.showStatus("Files uploaded successfully");
+                //self._uploadStatusComponent.showStatus("Files uploaded successfully");
+                self._uploadStatusComponent.showStatusWithSpinner("Submitting files..");
             }
             self._isUploadInProgress = false;
             //defer.resolve(self._skippedFiles);

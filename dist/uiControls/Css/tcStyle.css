@@ -19,19 +19,18 @@
 }
 
 .tc-loader {
-    left: 50%;
-    top: 50%;
-    font-size: 8px;
+    font-size: 4px;
     width: 1em;
     height: 1em;
     border-radius: 50%;
-    position: absolute;
     text-indent: -9999em;
     -webkit-animation: load5 1.1s infinite ease;
     animation: load5 1.1s infinite ease;
     -webkit-transform: translateZ(0);
     -ms-transform: translateZ(0);
     transform: translateZ(0);
+    margin-left: 4em;
+    margin-bottom: 0.5em;
 }
 @-webkit-keyframes load5 {
     0%,
@@ -89,7 +88,7 @@
 }
 
 .tc-spinner {
-    position: relative;
+    display: inline-block
 }
 
 .tc-table-study {

@@ -32,4 +32,10 @@
         self._container.append("<span title='Retry' class='tc-retry-upload'></span>");
         self._container.find("span.tc-retry-upload").click(retryCallback);
     }
+
+    this.showStatusWithSpinner = function (status) {
+        let self = this;
+        self.showStatus(status);
+        self._container.append("<div class='tc-spinner'><div class='tc-loader'></div></div>");
+    }
 }

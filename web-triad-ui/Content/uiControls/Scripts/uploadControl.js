@@ -8,14 +8,14 @@
                 sizeChunk: 1024 * 1024,
                 numberOfConnection: 6
             },
-            setAvailabilityStatusAddingFiles: function (isAvailable) {
+            setAvailabilityStatusAddingFiles: function(isAvailable) {
                 console.log("AvailabilityStatusAddingFiles: " + isAvailable);
             },
-            getSecurityToken: function () {
+            getSecurityToken: function() {
                 console.log("getSecurityToken() not implemented");
                 return null;
             },
-            onFilesUploaded: function () {
+            onFilesUploaded: function() {
                 console.log("On updated event handler was not added.");
             },
             securityToken: null
@@ -33,14 +33,14 @@
         _dictionaryStateOfCollapse: {},*/
 
         /////////////////////////////////////////////////////////////////////////
-        setSecurityToken: function (token) {
+        setSecurityToken: function(token) {
             if (token === null) return;
             let self = this;
             self.options.securityToken = token;
             self._service.setSecurityToken(self.options.securityToken);
         },
 
-        _create: function () {
+        _create: function() {
             /* this._studies = {};
              this._filesProcessing = {};
              this._studiesUploading = {};
@@ -59,21 +59,21 @@
 
             var parsingPanel = this.element.find(".tc-uploadingPanel");
             UploadQueueHandleService.init(self._service, parsingPanel.find("tbody"));
-            UploadQueueHandleService.addOnUploadCompletedHandler(function (result) {
+            UploadQueueHandleService.addOnUploadCompletedHandler(function(result) {
                 self._update(self, result);
             });
-            UploadQueueHandleService.addOnQueueEmptiedHandler(function () { parsingPanel.hide(); });
+            UploadQueueHandleService.addOnQueueEmptiedHandler(function() { parsingPanel.hide(); });
         },
 
         /////////////////////////////////////////////////////////////////////////
 
-        _destroy: function () {
+        _destroy: function() {
             this.element.html("");
         },
 
         /////////////////////////////////////////////////////////////////////////
 
-        addFiles: function (files) {
+        addFiles: function(files) {
             if (files.length == 0) return;
             let self = this;
             self.element.find(".tc-uploadingPanel").show();
@@ -82,20 +82,20 @@
             //                       Name: "TypeOfSubmit",
             //                       Value: TypeOfSubmit.CreateSubmissionPackage
             //                     };
-            var uploadParameters = self.options.uploadData;//.concat(typeSubmitData);
+            var uploadParameters = self.options.uploadData; //.concat(typeSubmitData);
 
             UploadQueueHandleService.addNewTask(files, uploadParameters);
         },
 
         /////////////////////////////////////////////////////////////////////////
 
-        getProcessingStatus: function () {
+        getProcessingStatus: function() {
             return UploadQueueHandleService.getProcessingStaus();
         },
 
         /////////////////////////////////////////////////////////////////////////
 
-        _update: function (self, result) {
+        _update: function(self, result) {
             self.options.onFilesUploaded(result);
         },
 
@@ -455,28 +455,32 @@
                 "</tr></thead>" +
                 "<tbody></tbody>" +
                 "</table>" +
-                "</div>"
-        /*
-                _series_T:
-                    "<tr><td colspan='7'>" +
-                        "<div class='tc-series'>" +
-                        "<table class='tc-table-series'>" +
-                        "<thead><tr>" +
-                        "<th></th>" +
-                        "<th>Series Description</th>" +
-                        "<th style='width: 150px; text-align: center'>Modality</th>" +
-                        "<th style='width: 150px; text-align: center'>Series Number</th>" +
-                        "<th style='width: 250px; text-align: center'>No. of Files</th>" +
-                        "<th style='width: 200px; text-align: center' class='tc-action-th'></th>" +
-                        "</tr></thead>" +
-                        "<tbody></tbody>" +
-                        "</table>" +
-                        "</div>" +
-                        "</td></tr>",
-        
-                _progressBar_T:
-                    "<div class='tc-progress-bar'>" +
-                        "<span></span>" +
-                        "</div>"*/
-    });
+                "</div>",
+        _spinner_T:
+            "<div class='tc-spinner'>" +
+                "<div class='tc-loader'></div>" +
+            "</div>"
+    /*
+            _series_T:
+                "<tr><td colspan='7'>" +
+                    "<div class='tc-series'>" +
+                    "<table class='tc-table-series'>" +
+                    "<thead><tr>" +
+                    "<th></th>" +
+                    "<th>Series Description</th>" +
+                    "<th style='width: 150px; text-align: center'>Modality</th>" +
+                    "<th style='width: 150px; text-align: center'>Series Number</th>" +
+                    "<th style='width: 250px; text-align: center'>No. of Files</th>" +
+                    "<th style='width: 200px; text-align: center' class='tc-action-th'></th>" +
+                    "</tr></thead>" +
+                    "<tbody></tbody>" +
+                    "</table>" +
+                    "</div>" +
+                    "</td></tr>",
+    
+            _progressBar_T:
+                "<div class='tc-progress-bar'>" +
+                    "<span></span>" +
+                    "</div>"*/
+});
 })(jQuery, window, document);
