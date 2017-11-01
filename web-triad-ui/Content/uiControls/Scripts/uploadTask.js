@@ -40,14 +40,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
     this._uploadPromise;
 
-    //this._skippedFiles = {
-    //    NumberOfStudies: 0,
-    //    NumberOfDicoms: 0,
-    //    NumberOfCorruptedDicoms: 0,
-    //    NumberOfNonDicoms: 0,
-    //    TotalFileCount: 0,
-    //    Studies: []
-    //};
+    this._rejectedAndCorruptedData = null;
 
     this.onRetryRequested = function (guidOfFilesSet) { console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet) };
 
@@ -113,15 +106,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
         self._isCanceled = true;
         self._isUploadInProgress = false;
-        //self._skippedFiles = {
-        //    NumberOfStudies: 0,
-        //    NumberOfDicoms: 0,
-        //    NumberOfCorruptedDicoms: 0,
-        //    NumberOfNonDicoms: 0,
-        //    TotalFileCount: 0,
-        //    Studies: []
-        //};
-
+        self._rejectedAndCorruptedData = null;
         self._uploadPromise.reject();
 
         self._webService.cancelUploadAndSubmitListOfFiles(self._cancelToken,
@@ -131,14 +116,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
     }
 
     this._retry = function (self) {
-        //self._skippedFiles = {
-        //    NumberOfStudies: 0,
-        //    NumberOfDicoms: 0,
-        //    NumberOfCorruptedDicoms: 0,
-        //    NumberOfNonDicoms: 0,
-        //    TotalFileCount: 0,
-        //    Studies: []
-        //};
+        self._rejectedAndCorruptedData = null;
         self._isCanceled = false;
         self._uploadStatusComponent.showStatus(waitingStatusText);
         self.onRetryRequested(self._guidOfFilesSet);
@@ -166,20 +144,22 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
                 break;
             }
             if (result.processStep == ProcessStep.Processing) {
-                self._uploadStatusComponent.showStatus("Files uploaded successfully");
+                var totalRejectedFiles = result.rejectedAndCorruptedData.NumberOfCorruptedDicoms +
+                    result.rejectedAndCorruptedData.NumberOfRejectedNonDicoms;
+                var statusString = self._files.length - totalRejectedFiles
+                    + " file(s) uploaded successfully. ";
+                if (totalRejectedFiles != 0) statusString += totalRejectedFiles + " file(s) rejected to upload";
+                self._uploadStatusComponent.showStatus(statusString);
+                self._rejectedAndCorruptedData = result.rejectedAndCorruptedData;
+                defer.resolve(self._rejectedAndCorruptedData);
                 break;
             }
             self._uploadStatusComponent.updateProgressBar(result.progress);
             if (result.message != "CancelSubmit") {
-                //var statusString = self._files.length - self._skippedFiles.TotalFileCount + " file(s) uploaded successfully. ";
-                //if (self._skippedFiles.TotalFileCount != 0) statusString += self._skippedFiles.TotalFileCount + " file(s) rejected to upload";
-                //self._uploadStatusComponent.showStatus(statusString);
-                //self._uploadStatusComponent.showStatus("Files uploaded successfully");
                 self._uploadStatusComponent.showStatusWithSpinner("Submitting files..");
             }
             self._isUploadInProgress = false;
-            //defer.resolve(self._skippedFiles);
-            defer.resolve();
+            //defer.reject();
             break;
         case ProcessStatus.InProgress:
             self._uploadStatusComponent.updateProgressBar(result.progress);
@@ -217,64 +197,5 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
             else self._uploadStatusComponent.showStatus("Failed");
         }
         else setTimeout(function () { self._fakeUploadWithFailedResultFunction(counter, defer) }, 1000);
-    }
-
-
-    this._addSkippedFiles = function (skippedFiles) {
-        let self = this;
-
-        for (var i = 0; i < skippedFiles.length; i++) {
-            if (skippedFiles[i].IsDicom == true) {
-
-                self._skippedFiles.TotalFileCount++;
-
-                if (skippedFiles[i].IsCorrectDicom == false) {
-                    self._skippedFiles.NumberOfCorruptedDicoms++;
-                    continue;
-                }
-
-                self._skippedFiles.NumberOfDicoms++;
-
-                var index = self._skippedFiles.Studies.findIndex(function (item) {
-                    return item.StudyInstanceUID == skippedFiles[i].StudyInstanceUID;
-                });
-                if (index == -1) {
-                    self._skippedFiles.NumberOfStudies++;
-                    self._skippedFiles.Studies.push(
-                        {
-                            StudyInstanceUID: skippedFiles[i].StudyInstanceUID,
-                            StudyDescription: skippedFiles[i].StudyDescription,
-                            NumberOfFiles: 1,
-                            NumberOfSeries: 1,
-                            Series: [{
-                                NumberOfFiles: 1,
-                                SeriesInstanceUID: skippedFiles[i].SeriesInstanceUID,
-                                SeriesDescription: skippedFiles[i].SeriesDescription
-                            }]
-                        }
-                    );
-
-                } else {
-                    self._skippedFiles.Studies[index].NumberOfFiles++;
-                    var indexOfSeries = self._skippedFiles.Studies[index].Series.findIndex(function (item) {
-                        return item.SeriesInstanceUID == skippedFiles[i].SeriesInstanceUID;
-                    });
-                    if (indexOfSeries == -1) {
-                        self._skippedFiles.Studies[index].NumberOfSeries++;
-                        self._skippedFiles.Studies[index].Series.push(
-                            {
-                                NumberOfFiles: 1,
-                                SeriesInstanceUID: skippedFiles[i].SeriesInstanceUID,
-                                SeriesDescription: skippedFiles[i].SeriesDescription
-                            });
-                    } else {
-                        self._skippedFiles.Studies[index].Series[indexOfSeries].NumberOfFiles++;
-                    }
-                }
-            } else {
-                self._skippedFiles.NumberOfNonDicoms++;
-                self._skippedFiles.TotalFileCount++;
-            }
-        };
     }
 }
