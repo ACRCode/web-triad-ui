@@ -96,9 +96,6 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
         self._cancelToken = self._webService.submitFiles(files, self._uploadParameters,
             function (result) { self._handleUploadProgress(result, self._uploadPromise); });
-
-        //self._fakeUploadWithSuccessResultFunction(1, defer);
-        //self._fakeUploadWithFailedResultFunction(1, defer);
     }
 
     this._cancelUpload = function () {
@@ -139,29 +136,34 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
 
         switch (result.processStatus) {
         case ProcessStatus.Success:
-            if (result.processStep == ProcessStep.Submitting) {
-                self._uploadStatusComponent.showStatusWithSpinner("Processing files..");
-                break;
-            }
-            if (result.processStep == ProcessStep.Processing) {
+            switch (result.processStep) {
+            case ProcessStep.Processing:
                 var totalRejectedFiles = result.rejectedAndCorruptedData.NumberOfCorruptedDicoms +
-                    result.rejectedAndCorruptedData.NumberOfRejectedNonDicoms;
+                    result.rejectedAndCorruptedData.NumberOfRejectedNonDicoms +
+                    result.rejectedAndCorruptedData.NumberOfRejectedDicomDir;
                 var statusString = self._files.length - totalRejectedFiles
                     + " file(s) uploaded successfully. ";
                 if (totalRejectedFiles != 0) statusString += totalRejectedFiles + " file(s) rejected to upload";
                 self._uploadStatusComponent.showStatus(statusString);
                 self._rejectedAndCorruptedData = result.rejectedAndCorruptedData;
                 defer.resolve(self._rejectedAndCorruptedData);
+                self._showRemoveOrCancelButton();
+                break;
+            case ProcessStep.Uploading:
+                self._uploadStatusComponent.updateProgressBar(result.progress);
+                self._isUploadInProgress = false;
+                break;
+            case ProcessStep.Canceling:
+                defer.reject();
                 break;
             }
-            self._uploadStatusComponent.updateProgressBar(result.progress);
-            if (result.message != "CancelSubmit") {
-                self._uploadStatusComponent.showStatusWithSpinner("Submitting files..");
-            }
-            self._isUploadInProgress = false;
-            //defer.reject();
             break;
         case ProcessStatus.InProgress:
+            if (result.processStep == ProcessStep.Processing) {
+                self._hideRemoveOrCancelButton();
+                self._uploadStatusComponent.showStatusWithSpinner("Processing files..");
+                break;
+            }
             self._uploadStatusComponent.updateProgressBar(result.progress);
             break;
         case ProcessStatus.Error:
@@ -173,29 +175,15 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
         }
     }
 
-    this._fakeUploadWithSuccessResultFunction = function (counter, defer) {
+    this._hideRemoveOrCancelButton = function () {
         let self = this;
-        console.log("counter: " + counter);
-        self._uploadStatusComponent.updateProgressBar(counter / 4 * 100);
-        if (counter++ === 4 || self._isCanceled) {
-            defer.resolve("Done");
-            self._isUploadInProgress = false;
-            if (self._isCanceled) self._uploadStatusComponent.showStatusWithRetryButton("Canceled", function () { self._retry(self); });
-            else self._uploadStatusComponent.showStatus("Completed");
-        }
-        else setTimeout(function () { self._fakeUploadWithSuccessResultFunction(counter, defer) }, 1000);
+        var removeOrCancelButton = $("tr[data-fileset-uid='" + self._guidOfFilesSet + "'] span.tc-cancel-or-remove-upload-from-queue");
+        removeOrCancelButton.hide();
     }
 
-    this._fakeUploadWithFailedResultFunction = function (counter, defer) {
+    this._showRemoveOrCancelButton = function () {
         let self = this;
-        console.log("counter: " + counter);
-        self._uploadStatusComponent.updateProgressBar(counter / 4 * 100);
-        if (counter++ === 4 || self._isCanceled) {
-            defer.reject();
-            self._isUploadInProgress = false;
-            if (self._isCanceled) self._uploadStatusComponent.showStatusWithRetryButton("Canceled", function () { self._retry(self); });
-            else self._uploadStatusComponent.showStatus("Failed");
-        }
-        else setTimeout(function () { self._fakeUploadWithFailedResultFunction(counter, defer) }, 1000);
+        var removeOrCancelButton = $("tr[data-fileset-uid='" + self._guidOfFilesSet + "'] span.tc-cancel-or-remove-upload-from-queue");
+        removeOrCancelButton.show();
     }
 }
