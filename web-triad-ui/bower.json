@@ -9,7 +9,7 @@
         "acrsm"
     ],
     "dependencies": {
-        "web-triad-sdk-for-js": "0.1.6"
+        "web-triad-sdk-for-js": "0.1.7"
     },
     "license": "MIT",
     "homepage": "https://github.com/acrscm/web-triad-ui",
