@@ -139,6 +139,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
             switch (result.processStep) {
             case ProcessStep.Processing:
                 var totalRejectedFiles = result.rejectedAndCorruptedData.NumberOfCorruptedDicoms +
+                    result.rejectedAndCorruptedData.NumberOfRejectedDicoms +
                     result.rejectedAndCorruptedData.NumberOfRejectedNonDicoms +
                     result.rejectedAndCorruptedData.NumberOfRejectedDicomDir;
                 var statusString = self._files.length - totalRejectedFiles
