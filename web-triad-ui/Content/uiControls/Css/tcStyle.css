@@ -253,6 +253,11 @@ span.tc-delete-series {
     margin: auto;
 }
 
+.ts-not-alowed {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 .tc-table-study input[type=checkbox] {
     display: none;
 }

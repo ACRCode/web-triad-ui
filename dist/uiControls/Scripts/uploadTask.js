@@ -152,7 +152,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
                 break;
             case ProcessStep.Uploading:
                 self._uploadStatusComponent.updateProgressBar(result.progress);
-                self._isUploadInProgress = false;
+                self._isUploadInProgress = false;                
                 break;
             case ProcessStep.Canceling:
                 defer.reject();
@@ -179,12 +179,12 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
     this._hideRemoveOrCancelButton = function () {
         let self = this;
         var removeOrCancelButton = $("tr[data-fileset-uid='" + self._guidOfFilesSet + "'] span.tc-cancel-or-remove-upload-from-queue");
-        removeOrCancelButton.hide();
+        removeOrCancelButton.addClass("ts-not-alowed");
     }
 
     this._showRemoveOrCancelButton = function () {
         let self = this;
         var removeOrCancelButton = $("tr[data-fileset-uid='" + self._guidOfFilesSet + "'] span.tc-cancel-or-remove-upload-from-queue");
-        removeOrCancelButton.show();
+        removeOrCancelButton.removeClass("ts-not-alowed");
     }
 }
