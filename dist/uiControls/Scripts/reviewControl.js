@@ -7,7 +7,9 @@
                     serverApiUrl: "http://localhost:57808/api",
                     numberOfFilesInPackage: 4,
                     sizeChunk: 1024 * 1024 * 2,
-                    numberOfConnection: 6
+                    numberOfConnection: 6,
+                    dicomsDisabled: false,
+                    nonDicomsDisabled: false
                 },
                 getSecurityToken: function () {
                     console.log("getSecurityToken() not implemented");
@@ -43,12 +45,11 @@
 
             update: function (options) {
                 let self = this;
-                //var spinner_E = $(self._spinner_T);
-                //self.element.html(spinner_E);
 
                 $.extend(self.options, options);
 
                 var studies_E = $(self._studies_T);
+                var non_dicoms_E = $(self._non_dicoms_T);
 
                 if (!self.options.isImagesViewingAllowed) {
                     studies_E.find("#studyImageViewColumnHeader").remove();
@@ -56,93 +57,223 @@
 
                 if (!self.options.isImagesRemovingAllowed) {
                     studies_E.find("#studyRemoveColumnHeader").remove();
+                    non_dicoms_E.find("#fileRemoveColumnHeader").remove();
                 }
 
                 self._service = new WebTriadService(self.options.serviceParam);
 
-                var deferred1 = $.Deferred();
-                $.when(self._getStudiesDetailsDef()).then(function (data) {
+                var deferredGetStudies;
 
-                    if (data.length === 0) {
-                        self.element.html("");
-                        return;
-                    }
+                if (self.options.serviceParam.dicomsDisabled) {
+                    deferredGetStudies = $.Deferred().resolve(null).promise();
+                } else {
+                    deferredGetStudies =
+                        $.when(self._getStudiesDetailsDef()).then(function (data) {
 
-                    var tbody = studies_E.find("tbody");
+                            if (data.length === 0) {
+                                return $.Deferred().resolve(null).promise();
+                            }
 
-                    for (let i = 0; i < data.length; i++) {
+                            var tbody = studies_E.find("tbody");
 
-                        var isExpanded = self._dictionaryStateOfCollapse[data[i].Metadata.DicomDataStudyID];
-                        if (isExpanded === undefined) {
-                            self._dictionaryStateOfCollapse[data[i].Metadata.DicomDataStudyID] = true;
-                            isExpanded = true;
-                        }
-                        var str = isExpanded === true ? "tc-expanded" : "";
-                        var size = Math.round((data[i].Metadata.StudySize / (1024 * 1024)) * 100) / 100;
-                        tbody.append(
-                            "<tr data-study-id='" +
-                            data[i].Metadata.DicomDataStudyID +
-                            "'>" +
-                            "<td><span class='tc-collapse " +
-                            str +
-                            "'></span></td>" +
-                            "<td>" +
-                            data[i].Metadata.StudyDescription +
-                            "</td>" +
-                            "<td style='text-align: center;'>" +
-                            data[i].Metadata.StudyDate +
-                            "</td>" +
-                            "<td style='text-align: center;'>" +
-                            size +
-                            "mb </td>" +
-                            ((self.options.isImagesViewingAllowed)
-                                ? "<td><span class='tc-open-image'></span></td>"
-                                : "") +
-                            ((self.options.isImagesRemovingAllowed)
-                                ? "<td style='text-align: center;'><span class='tc-delete-study'></span></td>"
-                                : "") +
-                            "</tr>"
-                        );
+                            for (let i = 0; i < data.length; i++) {
 
-                        var series_E = (self.options.isImagesRemovingAllowed)
-                            ? $(self._series_with_remove_action_T)
-                            : $(self._series_T);
-                        isExpanded === true ? series_E.find(".tc-series").show() : series_E.find(".tc-series").hide();
-                        var tbodySeries = series_E.find("tbody");
+                                var isExpanded = self._dictionaryStateOfCollapse[data[i].Id];
+                                if (isExpanded === undefined) {
+                                    self._dictionaryStateOfCollapse[data[i].Id] = true;
+                                    isExpanded = true;
+                                }
+                                var str = isExpanded === true ? "tc-expanded" : "";
+                                var size = (Math.round((data[i].Metadata.StudySize / (1024 * 1024)) * 100) / 100) +
+                                    "mb";
+                                if (size == "0mb")
+                                    size = (Math.round((data[i].Metadata.StudySize / (1024)) * 100) / 100) + "kb";
+                                tbody.append(
+                                    "<tr data-study-id='" +
+                                    data[i].Id +
+                                    "'>" +
+                                    "<td><span class='tc-collapse " +
+                                    str +
+                                    "'></span></td>" +
+                                    "<td>" +
+                                    data[i].Metadata.StudyDescription +
+                                    "</td>" +
+                                    "<td style='text-align: center;'>" +
+                                    data[i].Metadata.StudyDate +
+                                    "</td>" +
+                                    "<td style='text-align: center;'>" +
+                                    size +
+                                    "</td>" +
+                                    ((self.options.isImagesViewingAllowed)
+                                        ? "<td><span class='tc-open-image'></span></td>"
+                                        : "") +
+                                    ((self.options.isImagesRemovingAllowed)
+                                        ? "<td style='text-align: center;'><span class='tc-delete-study' data-delete-link ='" +
+                                        data[i]._links.delete.href +
+                                        "'></span></td>"
+                                        : "") +
+                                    "</tr>"
+                                );
 
-                        for (let j = 0; j < data[i].Series.length; j++) {
-                            tbodySeries.append(
-                                "<tr for-data-study-id='" +
-                                data[i].Metadata.DicomDataStudyID +
-                                "' data-series-id='" +
-                                data[i].Series[j].Metadata.SeriesId +
+                                var series_E = $(self._series_T);
+
+                                if (!self.options.isImagesRemovingAllowed) {
+                                    series_E.find(".tc-action-th").remove();
+                                }
+
+                                isExpanded === true
+                                    ? series_E.find(".tc-series").show()
+                                    : series_E.find(".tc-series").hide();
+                                var tbodySeries = series_E.find("tbody");
+
+                                for (let j = 0; j < data[i].Series.length; j++) {
+                                    tbodySeries.append(
+                                        "<tr for-data-study-id='" +
+                                        data[i].Id +
+                                        "' data-series-id='" +
+                                        data[i].Series[j].Id +
+                                        "'>" +
+                                        "<td></td>" +
+                                        "<td>" +
+                                        data[i].Series[j].Metadata.SeriesDescription +
+                                        "</td>" +
+                                        "<td style='text-align: center;'>" +
+                                        data[i].Series[j].Metadata.Modality +
+                                        "</td>" +
+                                        "<td style='text-align: center;'>" +
+                                        data[i].Series[j].Metadata.SeriesDate +
+                                        "</td>" +
+                                        "<td style='text-align: center;'>" +
+                                        data[i].Series[j].Metadata.NoOfObjects +
+                                        "</td>" +
+                                        ((self.options.isImagesRemovingAllowed)
+                                            ? "<td style='text-align: center;'><span class='tc-delete-series' data-delete-link ='" +
+                                            data[i].Series[j]._links.delete.href +
+                                            "'></span></td>"
+                                            : "") +
+                                        "</tr>"
+                                    );
+                                }
+                                tbody.append(series_E);
+                            }
+                            return $.Deferred().resolve(studies_E).promise();
+                        });
+                }
+
+                var deferredGetNonDicoms;
+
+                if (self.options.serviceParam.nonDicomsDisabled) {
+                    deferredGetNonDicoms = $.Deferred().resolve(null).promise();
+                } else {
+                    deferredGetNonDicoms =
+                        $.when(self._getNonDicomsDetailsDef()).then(function (data) {
+
+                            if (data.length === 0) {
+                                return $.Deferred().resolve(null).promise();
+                            }
+
+                            var tbody = non_dicoms_E.find("tbody");
+
+                            var totalSize = 0;
+                            for (let i = 0; i < data.length; i++) {
+                                totalSize += parseInt(data[i].Metadata.Size);
+                            }
+                            var roundTotalSize = (Math.round((totalSize / (1024 * 1024)) * 100) / 100) + "mb";
+                            if (roundTotalSize == "0mb")
+                                roundTotalSize = (Math.round((totalSize / (1024)) * 100) / 100) + "kb";
+
+                            var isExpanded = self._dictionaryStateOfCollapse["xxx"];
+                            if (isExpanded === undefined) {
+                                self._dictionaryStateOfCollapse["xxx"] = true;
+                                isExpanded = true;
+                            }
+                            var str = isExpanded === true ? "tc-expanded" : "";
+
+                            tbody.append(
+                                "<tr data-study-id='" +
+                                "xxx" +
                                 "'>" +
-                                "<td></td>" +
+                                "<td><span class='tc-collapse " +
+                                str +
+                                "'></span></td>" +
                                 "<td>" +
-                                data[i].Series[j].Metadata.SeriesDescription +
+                                "&nbsp;" +
                                 "</td>" +
                                 "<td style='text-align: center;'>" +
-                                data[i].Series[j].Metadata.Modality +
+                                data.length +
                                 "</td>" +
                                 "<td style='text-align: center;'>" +
-                                data[i].Series[j].Metadata.SeriesDate +
-                                "</td>" +
-                                "<td style='text-align: center;'>" +
-                                data[i].Series[j].Metadata.NoOfObjects +
+                                roundTotalSize +
                                 "</td>" +
                                 ((self.options.isImagesRemovingAllowed)
-                                    ? "<td style='text-align: center;'><span class='tc-delete-series'></span></td>"
+                                    ? "<td style='text-align: center;'><span class='tc-delete-study' data-delete-link ='" +
+                                    "xxx" +
+                                    "'></span></td>"
                                     : "") +
                                 "</tr>"
                             );
-                        }
-                        tbody.append(series_E);
-                    }
-                    deferred1.resolve().promise();
-                });
 
-                $.when(deferred1).then(function () {
-                    self.element.html(studies_E);
+
+                            var each_non_dicom_E = $(self._each_non_dicom_T);
+
+                            if (!self.options.isImagesRemovingAllowed) {
+                                each_non_dicom_E.find(".tc-action-th").remove();
+                            }
+
+                            isExpanded === true
+                                ? each_non_dicom_E.find(".tc-series").show()
+                                : each_non_dicom_E.find(".tc-series").hide();
+                            var tbodyNonDicom = each_non_dicom_E.find("tbody");
+
+                            for (let i = 0; i < data.length; i++) {
+
+                                var size = (Math.round((data[i].Metadata.Size / (1024 * 1024)) * 100) / 100) + "mb";
+                                if (size == "0mb")
+                                    size = (Math.round((data[i].Metadata.Size / (1024)) * 100) / 100) + "kb";
+                                tbodyNonDicom.append(
+                                    "<tr data-study-id='" +
+                                    data[i].Id +
+                                    "'>" +
+                                    "<td></td>" +
+                                    "<td>" +
+                                    data[i].Metadata.Name +
+                                    "</td>" +
+                                    "<td style='text-align: center;'>" +
+                                    data[i].Metadata.Type +
+                                    "</td>" +
+                                    "<td style='text-align: center;'>" +
+                                    size +
+                                    "</td>" +
+                                    ((self.options.isImagesRemovingAllowed)
+                                        ? "<td style='text-align: center;'><span class='tc-delete-series' data-delete-link ='" +
+                                        data[i]._links.delete.href +
+                                        "'></span></td>"
+                                        : "") +
+                                    "</tr>"
+                                );
+                            }
+                            tbody.append(each_non_dicom_E);
+                            return $.Deferred().resolve(non_dicoms_E).promise();
+                        });
+                }
+
+                $.when(deferredGetStudies, deferredGetNonDicoms).done(function (dicomData, nonDicomData) {
+                    if (dicomData == null && nonDicomData == null) {
+                        self.element.html("");
+                        return;
+                    }
+                    var isEmpty = true;
+                    if (dicomData != null) {
+                        self.element.html(dicomData);
+                        isEmpty = false;
+                    }
+                    if (nonDicomData != null) {
+                        if (isEmpty) {
+                            self.element.html(nonDicomData);
+                        } else {
+                            self.element.append(nonDicomData);
+                        }
+                    }
                     self._bindEvent();
                 });
             },
@@ -183,19 +314,16 @@
 
             /////////////////////////////////////////////////////////////////////////
 
-            _getSeriesDetailsDef: function (studyId) {
+            _getNonDicomsDetailsDef: function () {
                 let self = this;
                 var deferred = $.Deferred();
-                var params = [{ Name: "DicomDataStudyID", "Value": studyId }];
-
                 /////////
                 /////////
                 /////////
                 var token = self.options.getSecurityToken();
                 self.setSecurityToken(token);
 
-                self._service.getSeriesDetails(params, callback);
-
+                self._service.getNonDicomsDetails(self.options.reviewData, callback);
 
                 function callback(data) {
                     if (data.status === ProcessStatus.Error) {
@@ -206,18 +334,13 @@
                     if (data.length > 0) {
                         for (let i = 0; i < data.length; i++) {
                             data[i].Metadata = self._arrayOfNameValueToDictionary(data[i].Metadata);
-
                         }
-                        data.DicomDataStudyID = studyId;
                     }
                     deferred.resolve(data);
                 }
 
                 return deferred.promise();
             },
-
-            /////////////////////////////////////////////////////////////////////////
-
 
             /////////////////////////////////////////////////////////////////////////
 
@@ -298,6 +421,7 @@
                                             self.update();
                                         }
                                     }
+
                                     $(this).dialog("destroy");
                                 },
                                 "No": function () {
@@ -323,10 +447,11 @@
                             buttons: {
                                 "Yes": function () {
                                     var seriesId = that.closest("tr").attr("data-series-id");
+                                    var studyId = that.closest("tr").attr("for-data-study-id");
                                     var token = self.options.getSecurityToken();
                                     self.setSecurityToken(token);
 
-                                    self._service.deleteSeries(seriesId, callback);
+                                    self._service.deleteSeries(studyId, seriesId, callback);
 
                                     function callback(data) {
                                         if (data.status === ProcessStatus.Error) {
@@ -336,6 +461,7 @@
                                             self.update();
                                         }
                                     }
+
                                     $(this).dialog("destroy");
                                 },
                                 "No": function () {
@@ -367,7 +493,7 @@
             _studies_T:
                 "<div class='tc-wrapper'>" +
                     "<table class='tc-table-study'>" +
-                    "<caption>Uploaded Files</caption>" +
+                    "<caption>Uploaded Dicoms</caption>" +
                     "<thead><tr>" +
                     "<th></th>" +
                     "<th>Study Description</th>" +
@@ -380,16 +506,31 @@
                     "</table>" +
                     "</div>",
 
-            _series_with_remove_action_T:
+            _non_dicoms_T:
+                "<div class='tc-wrapper'>" +
+                    "<table class='tc-table-study'>" +
+                    "<caption>Uploaded NonDicoms</caption>" +
+                    "<thead><tr>" +
+                    "<th></th>" +
+                    "<th></th>" +
+                    "<th style='width: 300px; text-align: center'>No. of Files</th>" +
+                    "<th style='width: 200px; text-align: center'>Size</th>" +
+                    "<th id='fileRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
+                    "</tr></thead>" +
+                    "<tbody>" +
+                    "</tbody>" +
+                    "</table>" +
+                    "</div>",
+
+            _each_non_dicom_T:
                 "<tr><td colspan='7'>" +
                     "<div class='tc-series'>" +
                     "<table class='tc-table-series'>" +
                     "<thead><tr>" +
                     "<th></th>" +
-                    "<th>Series Description</th>" +
-                    "<th style='width: 150px; text-align: center'>Modality</th>" +
-                    "<th style='width: 150px; text-align: center'>Series Date</th>" +
-                    "<th style='width: 200px; text-align: center'>No. of Files</th>" +
+                    "<th>File Name</th>" +
+                    "<th style='width: 300px; text-align: center'>File Type</th>" +
+                    "<th style='width: 200px; text-align: center'>Size</th>" +
                     "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
                     "</tr></thead>" +
                     "<tbody></tbody>" +
@@ -407,6 +548,7 @@
                     "<th style='width: 150px; text-align: center'>Modality</th>" +
                     "<th style='width: 150px; text-align: center'>Series Date</th>" +
                     "<th style='width: 200px; text-align: center'>No. of Files</th>" +
+                    "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
                     "</tr></thead>" +
                     "<tbody></tbody>" +
                     "</table>" +
