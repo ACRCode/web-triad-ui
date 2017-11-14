@@ -85,9 +85,9 @@
                                 }
                                 var str = isExpanded === true ? "tc-expanded" : "";
                                 var size = (Math.round((data[i].Metadata.StudySize / (1024 * 1024)) * 100) / 100) +
-                                    "mb";
-                                if (size == "0mb")
-                                    size = (Math.round((data[i].Metadata.StudySize / (1024)) * 100) / 100) + "kb";
+                                    " MB";
+                                if (size == "0 MB")
+                                    size = (Math.round((data[i].Metadata.StudySize / (1024)) * 100) / 100) + " KB";
                                 tbody.append(
                                     "<tr data-study-id='" +
                                     data[i].Id +
@@ -178,9 +178,9 @@
                             for (let i = 0; i < data.length; i++) {
                                 totalSize += parseInt(data[i].Metadata.Size);
                             }
-                            var roundTotalSize = (Math.round((totalSize / (1024 * 1024)) * 100) / 100) + "mb";
-                            if (roundTotalSize == "0mb")
-                                roundTotalSize = (Math.round((totalSize / (1024)) * 100) / 100) + "kb";
+                            var roundTotalSize = (Math.round((totalSize / (1024 * 1024)) * 100) / 100) + " MB";
+                            if (roundTotalSize == "0 MB")
+                                roundTotalSize = (Math.round((totalSize / (1024)) * 100) / 100) + " KB";
 
                             var isExpanded = self._dictionaryStateOfCollapse["xxx"];
                             if (isExpanded === undefined) {
@@ -188,6 +188,13 @@
                                 isExpanded = true;
                             }
                             var str = isExpanded === true ? "tc-expanded" : "";
+
+                            var uploadedFilesStr;
+                            if (data.length == 1) {
+                                uploadedFilesStr = "1 file has been uploaded";
+                            } else {
+                                uploadedFilesStr = data.length + " files have been uploaded";
+                            }
 
                             tbody.append(
                                 "<tr data-study-id='" +
@@ -197,16 +204,15 @@
                                 str +
                                 "'></span></td>" +
                                 "<td>" +
-                                "&nbsp;" +
+                                uploadedFilesStr +
                                 "</td>" +
-                                "<td style='text-align: center;'>" +
-                                data.length +
+                                "<td style='text-align: right; width: 300px'>" +
                                 "</td>" +
-                                "<td style='text-align: center;'>" +
-                                roundTotalSize +
+                                "<td style='text-align: center; width: 200px'>" +
+                                "Total Size: " + roundTotalSize +
                                 "</td>" +
                                 ((self.options.isImagesRemovingAllowed)
-                                    ? "<td style='text-align: center;'><span class='tc-delete-study' data-delete-link ='" +
+                                    ? "<td style='text-align: center; width: 100px'><span class='tc-delete-study' data-delete-link ='" +
                                     "xxx" +
                                     "'></span></td>"
                                     : "") +
@@ -227,9 +233,9 @@
 
                             for (let i = 0; i < data.length; i++) {
 
-                                var size = (Math.round((data[i].Metadata.Size / (1024 * 1024)) * 100) / 100) + "mb";
-                                if (size == "0mb")
-                                    size = (Math.round((data[i].Metadata.Size / (1024)) * 100) / 100) + "kb";
+                                var size = (Math.round((data[i].Metadata.Size / (1024 * 1024)) * 100) / 100) + " MB";
+                                if (size == "0 MB")
+                                    size = (Math.round((data[i].Metadata.Size / (1024)) * 100) / 100) + " KB";
                                 tbodyNonDicom.append(
                                     "<tr data-study-id='" +
                                     data[i].Id +
@@ -485,6 +491,21 @@
 
             /////////////////////////////////////////////////////////////////////////
 
+            _getFileNamesStr: function (data) {
+                var str = "";
+                for (let i = 0; i < data.length; i++) {
+                    str += data[i].Metadata.Name;
+                    if (str.length > 100) {
+                        return str;
+                    } else {
+                        str += ", ";
+                    }
+                }
+                return str;
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
             _spinner_T:
                 "<div class='tc-spinner'>" +
                     "<div class='tc-loader'></div>" +
@@ -493,7 +514,7 @@
             _studies_T:
                 "<div class='tc-wrapper'>" +
                     "<table class='tc-table-study'>" +
-                    "<caption>Uploaded Dicoms</caption>" +
+                    "<caption>Uploaded DICOM Files</caption>" +
                     "<thead><tr>" +
                     "<th></th>" +
                     "<th>Study Description</th>" +
@@ -509,8 +530,8 @@
             _non_dicoms_T:
                 "<div class='tc-wrapper'>" +
                     "<table class='tc-table-study'>" +
-                    "<caption>Uploaded NonDicoms</caption>" +
-                    "<thead><tr>" +
+                    "<caption>Uploaded Non-DICOM Files</caption>" +
+                    "<thead style='display: none'><tr>" +
                     "<th></th>" +
                     "<th></th>" +
                     "<th style='width: 300px; text-align: center'>No. of Files</th>" +
