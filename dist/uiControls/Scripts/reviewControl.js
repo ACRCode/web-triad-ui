@@ -191,7 +191,7 @@
                                 if (data[i]._links.delete == null) {
                                     canDeleteAllFiles = false;
                                 } else {
-                                    deleteLinks += data[i]._links.delete.href + " ";
+                                    deleteLinks += data[i].Id + " ";
                                 }
                             }
                             deleteLinks = deleteLinks.trim();
@@ -550,11 +550,11 @@
                             modal: true,
                             buttons: {
                                 "Yes": function () {
-                                    var deleteUrls = that.attr("data-delete-links").split(" ");
+                                    var deleteIds = that.attr("data-delete-links").split(" ");
                                     var token = self.options.getSecurityToken();
                                     self.setSecurityToken(token);
 
-                                    self._service.deleteNonDicoms(deleteUrls, callback);
+                                    self._service.deleteNonDicoms(deleteIds, callback);
 
                                     function callback(data) {
                                         if (data.status === ProcessStatus.Error) {
