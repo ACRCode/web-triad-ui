@@ -244,7 +244,8 @@ span.tc-retry-upload
 }
 
 span.tc-cancel-or-remove-upload-from-queue,
-span.tc-delete-series {
+span.tc-delete-series,
+span.tc-delete-non-dicom {
     width: 16px;
     height: 16px;
     display: block;
@@ -253,9 +254,10 @@ span.tc-delete-series {
     margin: auto;
 }
 
-.ts-not-alowed {
+.tc-not-allowed {
     opacity: 0.5;
     pointer-events: none;
+    cursor: not-allowed !important;
 }
 
 .tc-table-study input[type=checkbox] {
@@ -371,7 +373,8 @@ span.tc-delete-series {
     width: 0;      
 }
 
-.tc-actions-td span.tc-delete-study {
+.tc-actions-td span.tc-delete-study,
+span.tc-delete-non-dicoms {
     width: 20px;
     height: 20px;
     position: relative;
@@ -402,10 +405,6 @@ span.tc-delete-series {
     background-image: url(../Images/cancel.png);
     margin: auto;
     cursor: pointer;
-}
-
-.tc-not-allowed {
-    cursor: not-allowed !important;
 }
 
 .tc-btn {
@@ -446,14 +445,6 @@ span.tc-delete-series {
     content: url(../Images/upload-btn.png);
     margin-right: 4px;
 }
-
-.tc-btn.tc-not-allowed:hover {
-    background-color: #f2ad4e;
-}
-
-.tc-btn.tc-not-allowed {
-    opacity: .65;
-}  
 
 /*dialog*/
 .ui-state-disabled {
