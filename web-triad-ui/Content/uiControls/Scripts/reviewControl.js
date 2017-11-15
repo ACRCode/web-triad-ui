@@ -88,6 +88,8 @@
                                     " MB";
                                 if (size == "0 MB")
                                     size = (Math.round((data[i].Metadata.StudySize / (1024)) * 100) / 100) + " KB";
+
+                                let isDeleteLink = data[i]._links.delete == null ? false : true;
                                 tbody.append(
                                     "<tr data-study-id='" +
                                     data[i].Id +
@@ -108,9 +110,12 @@
                                         ? "<td><span class='tc-open-image'></span></td>"
                                         : "") +
                                     ((self.options.isImagesRemovingAllowed)
-                                        ? "<td style='text-align: center;'><span class='tc-delete-study' data-delete-link ='" +
-                                        data[i]._links.delete.href +
-                                        "'></span></td>"
+                                        ? (isDeleteLink
+                                            ? "<td style='text-align: center;'><span class='tc-delete-study' data-delete-link ='" +
+                                            data[i]._links.delete.href +
+                                            "'></span></td>"
+                                            : "<td style='text-align: center;'><span class='tc-delete-study tc-not-allowed'></span></td>"
+                                        )
                                         : "") +
                                     "</tr>"
                                 );
@@ -127,6 +132,7 @@
                                 var tbodySeries = series_E.find("tbody");
 
                                 for (let j = 0; j < data[i].Series.length; j++) {
+                                    let isDeleteLink = data[i].Series[j]._links.delete == null ? false : true;
                                     tbodySeries.append(
                                         "<tr for-data-study-id='" +
                                         data[i].Id +
@@ -147,9 +153,12 @@
                                         data[i].Series[j].Metadata.NoOfObjects +
                                         "</td>" +
                                         ((self.options.isImagesRemovingAllowed)
-                                            ? "<td style='text-align: center;'><span class='tc-delete-series' data-delete-link ='" +
-                                            data[i].Series[j]._links.delete.href +
-                                            "'></span></td>"
+                                            ? (isDeleteLink
+                                                ? "<td style='text-align: center;'><span class='tc-delete-series' data-delete-link ='" +
+                                                data[i].Series[j]._links.delete.href +
+                                                "'></span></td>"
+                                                : "<td style='text-align: center;'><span class='tc-delete-series tc-not-allowed'></span></td>"
+                                            )
                                             : "") +
                                         "</tr>"
                                     );
@@ -175,9 +184,17 @@
                             var tbody = non_dicoms_E.find("tbody");
 
                             var totalSize = 0;
+                            let canDeleteAllFiles = true;
+                            var deleteLinks = "";
                             for (let i = 0; i < data.length; i++) {
                                 totalSize += parseInt(data[i].Metadata.Size);
+                                if (data[i]._links.delete == null) {
+                                    canDeleteAllFiles = false;
+                                } else {
+                                    deleteLinks += data[i]._links.delete.href + " ";
+                                }
                             }
+                            deleteLinks = deleteLinks.trim();
                             var roundTotalSize = (Math.round((totalSize / (1024 * 1024)) * 100) / 100) + " MB";
                             if (roundTotalSize == "0 MB")
                                 roundTotalSize = (Math.round((totalSize / (1024)) * 100) / 100) + " KB";
@@ -209,16 +226,19 @@
                                 "<td style='text-align: right; width: 300px'>" +
                                 "</td>" +
                                 "<td style='text-align: center; width: 200px'>" +
-                                "Total Size: " + roundTotalSize +
+                                "Total Size: " +
+                                roundTotalSize +
                                 "</td>" +
                                 ((self.options.isImagesRemovingAllowed)
-                                    ? "<td style='text-align: center; width: 100px'><span class='tc-delete-study' data-delete-link ='" +
-                                    "xxx" +
-                                    "'></span></td>"
+                                    ? (canDeleteAllFiles
+                                        ? "<td style='text-align: center; width: 100px'><span class='tc-delete-non-dicoms' data-delete-links ='" +
+                                        deleteLinks +
+                                        "'></span></td>"
+                                        : "<td style='text-align: center; width: 100px'><span class='tc-delete-non-dicoms tc-not-allowed'></span></td>"
+                                    )
                                     : "") +
                                 "</tr>"
                             );
-
 
                             var each_non_dicom_E = $(self._each_non_dicom_T);
 
@@ -236,6 +256,7 @@
                                 var size = (Math.round((data[i].Metadata.Size / (1024 * 1024)) * 100) / 100) + " MB";
                                 if (size == "0 MB")
                                     size = (Math.round((data[i].Metadata.Size / (1024)) * 100) / 100) + " KB";
+                                let isDeleteLink = data[i]._links.delete == null ? false : true;
                                 tbodyNonDicom.append(
                                     "<tr data-study-id='" +
                                     data[i].Id +
@@ -251,9 +272,12 @@
                                     size +
                                     "</td>" +
                                     ((self.options.isImagesRemovingAllowed)
-                                        ? "<td style='text-align: center;'><span class='tc-delete-series' data-delete-link ='" +
-                                        data[i]._links.delete.href +
-                                        "'></span></td>"
+                                        ? (isDeleteLink
+                                            ? "<td style='text-align: center;'><span class='tc-delete-non-dicom' data-delete-link ='" +
+                                            data[i]._links.delete.href +
+                                            "'></span></td>"
+                                            : "<td style='text-align: center;'><span class='tc-delete-non-dicom tc-not-allowed'></span></td>"
+                                        )
                                         : "") +
                                     "</tr>"
                                 );
@@ -413,11 +437,11 @@
                             modal: true,
                             buttons: {
                                 "Yes": function () {
-                                    var studyId = that.closest("tr").attr("data-study-id");
+                                    var deleteUrl = that.attr("data-delete-link");
                                     var token = self.options.getSecurityToken();
                                     self.setSecurityToken(token);
 
-                                    self._service.deleteStudy(studyId, callback);
+                                    self._service.deleteStudy(deleteUrl, callback);
 
                                     function callback(data) {
                                         if (data.status === ProcessStatus.Error) {
@@ -452,12 +476,85 @@
                             modal: true,
                             buttons: {
                                 "Yes": function () {
-                                    var seriesId = that.closest("tr").attr("data-series-id");
-                                    var studyId = that.closest("tr").attr("for-data-study-id");
+                                    var deleteUrl = that.attr("data-delete-link");
                                     var token = self.options.getSecurityToken();
                                     self.setSecurityToken(token);
 
-                                    self._service.deleteSeries(studyId, seriesId, callback);
+                                    self._service.deleteSeries(deleteUrl, callback);
+
+                                    function callback(data) {
+                                        if (data.status === ProcessStatus.Error) {
+                                            console.log(data.message);
+                                            return;
+                                        } else {
+                                            self.update();
+                                        }
+                                    }
+
+                                    $(this).dialog("destroy");
+                                },
+                                "No": function () {
+                                    $(this).dialog("destroy");
+                                }
+                            }
+                        });
+                    });
+                });
+
+                self.element.find(".tc-delete-non-dicom").each(function () {
+                    var that = $(this);
+                    that.click(function () {
+                        let dialog = $(self._confirm_delete_non_dicom_T);
+                        dialog.dialog({
+                            dialogClass: "no-close",
+                            resizable: false,
+                            height: "auto",
+                            width: 400,
+                            modal: true,
+                            buttons: {
+                                "Yes": function () {
+                                    var deleteUrl = that.attr("data-delete-link");
+                                    var token = self.options.getSecurityToken();
+                                    self.setSecurityToken(token);
+
+                                    self._service.deleteNonDicom(deleteUrl, callback);
+
+                                    function callback(data) {
+                                        if (data.status === ProcessStatus.Error) {
+                                            console.log(data.message);
+                                            return;
+                                        } else {
+                                            self.update();
+                                        }
+                                    }
+
+                                    $(this).dialog("destroy");
+                                },
+                                "No": function () {
+                                    $(this).dialog("destroy");
+                                }
+                            }
+                        });
+                    });
+                });
+
+                self.element.find(".tc-delete-non-dicoms").each(function () {
+                    var that = $(this);
+                    that.click(function () {
+                        let dialog = $(self._confirm_delete_non_dicoms_T);
+                        dialog.dialog({
+                            dialogClass: "no-close",
+                            resizable: false,
+                            height: "auto",
+                            width: 400,
+                            modal: true,
+                            buttons: {
+                                "Yes": function () {
+                                    var deleteUrls = that.attr("data-delete-links").split(" ");
+                                    var token = self.options.getSecurityToken();
+                                    self.setSecurityToken(token);
+
+                                    self._service.deleteNonDicoms(deleteUrls, callback);
 
                                     function callback(data) {
                                         if (data.status === ProcessStatus.Error) {
@@ -488,7 +585,7 @@
                 }
                 return result;
             },
-            
+
             /////////////////////////////////////////////////////////////////////////
 
             _spinner_T:
@@ -519,8 +616,8 @@
                     "<thead style='display: none'><tr>" +
                     "<th></th>" +
                     "<th></th>" +
-                    "<th style='width: 300px; text-align: center'>No. of Files</th>" +
-                    "<th style='width: 200px; text-align: center'>Size</th>" +
+                    "<th style='width: 300px;'></th>" +
+                    "<th style='width: 200px;'></th>" +
                     "<th id='fileRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
                     "</tr></thead>" +
                     "<tbody>" +
@@ -569,6 +666,16 @@
             _confirm_delete_series_T:
                 "<div id='dialog-confirm' style='display: none;'>" +
                     "<p>Selected series will be deleted from this case. Please confirm.</p>" +
+                    "</div>",
+
+            _confirm_delete_non_dicom_T:
+                "<div id='dialog-confirm' style='display: none;'>" +
+                    "<p>This file will be deleted from the system. Please confirm.</p>" +
+                    "</div>",
+
+            _confirm_delete_non_dicoms_T:
+                "<div id='dialog-confirm' style='display: none;'>" +
+                    "<p>All the non-DICOM files will be deleted from the system. Please confirm.</p>" +
                     "</div>",
 
 
