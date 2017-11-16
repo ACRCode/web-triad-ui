@@ -153,6 +153,7 @@ var WebTriadService = (function () {
                     break;
                 case ProcessStatus.Error:
                     progressData.statusCode = uploadData.statusCode;
+                    progressData.statusText = uploadData.statusText;
                     progressData.processStatus = ProcessStatus.Error;
                     progressData.details = uploadData.details;
                     progressData.message = uploadData.message;
@@ -191,6 +192,7 @@ var WebTriadService = (function () {
     WebTriadService.prototype.createSubmissionPackage = function (parameters, submitFilesProgress) {
         var self = this;
         var progressData = new SubmissionProgressData();
+        progressData.processStep = ProcessStep.Uploading;
         $.ajax({
             url: this.submissionFileInfoApiUrl,
             type: "POST",
@@ -201,6 +203,7 @@ var WebTriadService = (function () {
             },
             error: function (jqXhr) {
                 progressData.statusCode = jqXhr.status;
+                progressData.statusText = jqXhr.statusText;
                 progressData.processStatus = ProcessStatus.Error;
                 progressData.message = "Error createSubmissionPackage";
                 progressData.details = jqXhr.responseText;
@@ -219,6 +222,7 @@ var WebTriadService = (function () {
     WebTriadService.prototype.addDicomFilesToExistingSubmissionPackage = function (uri, parameters, addDicomFilesProgress) {
         var self = this;
         var progressData = new SubmissionProgressData();
+        progressData.processStep = ProcessStep.Uploading;
         var filesUris = [];
         for (var _i = 0, parameters_1 = parameters; _i < parameters_1.length; _i++) {
             var uri_1 = parameters_1[_i];
@@ -237,6 +241,7 @@ var WebTriadService = (function () {
                 progressData.message = "Error additionalSubmit";
                 progressData.details = jqXhr.responseText;
                 progressData.statusCode = jqXhr.status;
+                progressData.statusText = jqXhr.statusText;
                 addDicomFilesProgress(progressData);
             },
             success: function (result, textStatus, jqXhr) {
@@ -260,7 +265,9 @@ var WebTriadService = (function () {
             },
             error: function (jqXhr, textStatus, errorThrown) {
                 progressData.processStatus = ProcessStatus.Error;
-                progressData.message = jqXhr.responseText;
+                progressData.message = "Error submitSubmissionPackage";
+                progressData.details = jqXhr.responseText;
+                progressData.statusText = jqXhr.statusText;
                 progressData.statusCode = jqXhr.status;
                 submissionProgress(progressData);
             },
@@ -290,7 +297,9 @@ var WebTriadService = (function () {
                 error: function (jqXhr, textStatus, errorThrown) {
                     progressData.processStatus = ProcessStatus.Error;
                     progressData.statusCode = jqXhr.status;
-                    progressData.message = jqXhr.responseText;
+                    progressData.statusText = jqXhr.statusText;
+                    progressData.message = "Error getSubmissionPackage";
+                    progressData.details = jqXhr.responseText;
                     getSubmissionPackageProgress(progressData);
                 },
                 success: function (result, text, jqXhr) {
@@ -307,7 +316,7 @@ var WebTriadService = (function () {
                     submissionProgress(progressData);
                     break;
                 case ProcessStatus.Success:
-                    switch (submissionsAreProcessed(progressData.additionalData)) {
+                    switch (getSubmissionStatus(progressData.additionalData)) {
                         case SubmissionPackageStatus.Failed:
                             progressData.processStatus = ProcessStatus.Error;
                             progressData.message = "Processing submission package failed";
@@ -325,12 +334,12 @@ var WebTriadService = (function () {
             }
         }
         ;
-        function submissionsAreProcessed(data) {
+        function getSubmissionStatus(data) {
             if (data.Status === "Failed")
                 return SubmissionPackageStatus.Failed;
             if (data.Status !== "Complete")
                 return SubmissionPackageStatus.Submitting;
-            for (var i = 0; i < data.Submissions; i++) {
+            for (var i = 0; i < data.Submissions.length; i++) {
                 if (data.Submissions[i].Status === "None" ||
                     data.Submissions[i].Status === "InProgress" ||
                     data.Submissions[i].Status === "NotStarted") {
@@ -379,6 +388,7 @@ var WebTriadService = (function () {
                     error: function (jqXhr, textStatus, errorThrown) {
                         progressData.processStatus = ProcessStatus.Error;
                         progressData.statusCode = jqXhr.status;
+                        progressData.statusText = jqXhr.statusText;
                         progressData.message = "Error cancelUploadAndSubmitListOfFiles";
                         progressData.details = jqXhr.responseText;
                         cancelSubmitProgress(progressData);
@@ -387,7 +397,6 @@ var WebTriadService = (function () {
                         progressData.processStatus = ProcessStatus.Success;
                         progressData.statusCode = jqXhr.status;
                         progressData.message = "Success cancelUploadAndSubmitListOfFiles";
-                        progressData.details = jqXhr.responseText;
                         cancelSubmitProgress(progressData);
                     }
                 });
@@ -395,7 +404,8 @@ var WebTriadService = (function () {
                     if (!listOfFiles.files[i].isAttached && listOfFiles.files[i].status !== FileStatus.Ready) {
                         listOfFiles.files[i].status = FileStatus.Canceling;
                         listOfFiles.files[i].cancelUploadFileProgress = cancelSubmitProgress;
-                        _this.deleteFileFromStage(listOfFiles.files[i]);
+                        if (listOfFiles.files[i] !== undefined)
+                            _this.deleteFileFromStage(listOfFiles.files[i]);
                     }
                 }
             });
@@ -405,6 +415,8 @@ var WebTriadService = (function () {
     WebTriadService.prototype.getStudiesDetails = function (parameters, callback) {
         var self = this;
         parameters = this.arrayOfNameValueToDictionary(parameters);
+        var progressData = new ReviewProgressData();
+        progressData.processStep = ReviewProcessStep.GettingStudies;
         $.ajax({
             url: this.submittedStudiesDetailsUrl + "?" + $.param(parameters),
             type: "GET",
@@ -413,15 +425,17 @@ var WebTriadService = (function () {
                 xhr.setRequestHeader("Authorization", self.securityToken);
             },
             error: function (jqXhr, textStatus, errorThrown) {
-                var data = {};
-                data.status = ProcessStatus.Error;
-                data.ProcessStep = ReviewProcessStep.GettingStudies;
-                data.message = jqXhr.responseText;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Error;
+                progressData.statusCode = jqXhr.status;
+                progressData.statusText = jqXhr.statusText;
+                progressData.message = "Error getStudiesDetails()";
+                progressData.details = jqXhr.responseText;
+                callback(progressData);
             },
             success: function (data, textStatus, jqXhr) {
-                data.status = ProcessStatus.Success;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Success;
+                progressData.data = data;
+                callback(progressData);
             }
         });
     };
@@ -432,7 +446,8 @@ var WebTriadService = (function () {
         if (deleteUrl.indexOf("/api/") > -1) {
             url = self.settings.serverApiUrl.replace("/api", "");
         }
-        var data = {};
+        var progressData = new ReviewProgressData();
+        progressData.processStep = ReviewProcessStep.DeletingStudies;
         $.ajax({
             url: url + deleteUrl,
             type: "DELETE",
@@ -440,14 +455,16 @@ var WebTriadService = (function () {
                 xhr.setRequestHeader("Authorization", self.securityToken);
             },
             error: function (jqXhr, textStatus, errorThrown) {
-                data.status = ProcessStatus.Error;
-                data.message = jqXhr.responseText;
-                data.ProcessStep = ReviewProcessStep.DeletingStudies;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Error;
+                progressData.statusCode = jqXhr.status;
+                progressData.statusText = jqXhr.statusText;
+                progressData.message = "Error deleteStudy()";
+                progressData.details = jqXhr.responseText;
+                callback(progressData);
             },
             success: function (result, textStatus, jqXhr) {
-                data.status = ProcessStatus.Success;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Success;
+                callback(progressData);
             }
         });
     };
@@ -458,7 +475,8 @@ var WebTriadService = (function () {
         if (deleteUrl.indexOf("/api/") > -1) {
             url = self.settings.serverApiUrl.replace("/api", "");
         }
-        var data = {};
+        var progressData = new ReviewProgressData();
+        progressData.processStep = ReviewProcessStep.DeletingSeries;
         $.ajax({
             url: url + deleteUrl,
             type: "DELETE",
@@ -466,14 +484,16 @@ var WebTriadService = (function () {
                 xhr.setRequestHeader("Authorization", self.securityToken);
             },
             error: function (jqXhr, textStatus, errorThrown) {
-                data.status = ProcessStatus.Error;
-                data.message = jqXhr.responseText;
-                data.ProcessStep = ReviewProcessStep.DeletingSeries;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Error;
+                progressData.statusCode = jqXhr.status;
+                progressData.statusText = jqXhr.statusText;
+                progressData.message = "Error deleteSeries()";
+                progressData.details = jqXhr.responseText;
+                callback(progressData);
             },
             success: function (result, textStatus, jqXhr) {
-                data.status = ProcessStatus.Success;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Success;
+                callback(progressData);
             }
         });
     };
@@ -484,7 +504,8 @@ var WebTriadService = (function () {
         if (deleteUrl.indexOf("/api/") > -1) {
             url = self.settings.serverApiUrl.replace("/api", "");
         }
-        var data = {};
+        var progressData = new ReviewProgressData();
+        progressData.processStep = ReviewProcessStep.DeletingNonDicomFiles;
         $.ajax({
             url: url + deleteUrl,
             type: "DELETE",
@@ -492,14 +513,16 @@ var WebTriadService = (function () {
                 xhr.setRequestHeader("Authorization", self.securityToken);
             },
             error: function (jqXhr, textStatus, errorThrown) {
-                data.status = ProcessStatus.Error;
-                data.message = jqXhr.responseText;
-                data.ProcessStep = ReviewProcessStep.DeletingNonDicomFiles;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Error;
+                progressData.statusCode = jqXhr.status;
+                progressData.statusText = jqXhr.statusText;
+                progressData.message = "Error deleteNonDicom()";
+                progressData.details = jqXhr.responseText;
+                callback(progressData);
             },
             success: function (result, textStatus, jqXhr) {
-                data.status = ProcessStatus.Success;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Success;
+                callback(progressData);
             }
         });
     };
@@ -507,9 +530,10 @@ var WebTriadService = (function () {
     WebTriadService.prototype.deleteNonDicoms = function (ids, callback) {
         var self = this;
         var arr = splitArray(ids, 300);
-        var _loop_1 = function (batch) {
+        var _loop_1 = function(batch) {
             var idsStr = batch.join();
-            var data = {};
+            var progressData = new ReviewProgressData();
+            progressData.processStep = ReviewProcessStep.DeletingNonDicomFiles;
             $.ajax({
                 url: self.nonDicomsUrl + "?ids=" + idsStr,
                 type: "DELETE",
@@ -517,14 +541,16 @@ var WebTriadService = (function () {
                     xhr.setRequestHeader("Authorization", self.securityToken);
                 },
                 error: function (jqXhr, textStatus, errorThrown) {
-                    data.status = ProcessStatus.Error;
-                    data.message = jqXhr.responseText;
-                    data.ProcessStep = ReviewProcessStep.DeletingNonDicomFiles;
-                    callback(data);
+                    progressData.processStatus = ProcessStatus.Error;
+                    progressData.statusCode = jqXhr.status;
+                    progressData.statusText = jqXhr.statusText;
+                    progressData.message = "Error deleteNonDicoms()";
+                    progressData.details = jqXhr.responseText;
+                    callback(progressData);
                 },
                 success: function (result, textStatus, jqXhr) {
-                    data.status = ProcessStatus.Success;
-                    callback(data);
+                    progressData.processStatus = ProcessStatus.Success;
+                    callback(progressData);
                 }
             });
         };
@@ -554,6 +580,8 @@ var WebTriadService = (function () {
     WebTriadService.prototype.getNonDicomsDetails = function (parameters, callback) {
         var self = this;
         parameters = this.arrayOfNameValueToDictionary(parameters);
+        var progressData = new ReviewProgressData();
+        progressData.processStep = ReviewProcessStep.GettingNonDicomFiles;
         $.ajax({
             url: this.nonDicomsUrl + "?" + $.param(parameters),
             type: "GET",
@@ -562,15 +590,17 @@ var WebTriadService = (function () {
                 xhr.setRequestHeader("Authorization", self.securityToken);
             },
             error: function (jqXhr, textStatus, errorThrown) {
-                var data = {};
-                data.status = ProcessStatus.Error;
-                data.message = jqXhr.responseText;
-                data.ProcessStep = ReviewProcessStep.GettingNonDicomFiles;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Error;
+                progressData.statusCode = jqXhr.status;
+                progressData.statusText = jqXhr.statusText;
+                progressData.message = "Error getNonDicomsDetails()";
+                progressData.details = jqXhr.responseText;
+                callback(progressData);
             },
             success: function (data, textStatus, jqXhr) {
-                data.status = ProcessStatus.Success;
-                callback(data);
+                progressData.processStatus = ProcessStatus.Success;
+                progressData.data = data;
+                callback(progressData);
             }
         });
     };
@@ -647,6 +677,7 @@ var WebTriadService = (function () {
                     data.message = "ERROR CANCEL UPLOAD FILE";
                     data.details = jqXhr.responseText;
                     data.statusCode = jqXhr.status;
+                    data.statusText = jqXhr.statusText;
                     callback(data);
                 },
                 success: function (result, textStatus, jqXhr) {
@@ -693,6 +724,7 @@ var WebTriadService = (function () {
                 error: function (jqXhr) {
                     file.defferedUploadChunks[1].resolve().promise();
                     fileProgressData.statusCode = jqXhr.status;
+                    fileProgressData.statusText = jqXhr.statusText;
                     fileProgressData.processStatus = ProcessStatus.Error;
                     fileProgressData.message = "File is not uploaded";
                     fileProgressData.details = jqXhr.responseText;
@@ -762,6 +794,8 @@ var WebTriadService = (function () {
                     progressData.processStatus = ProcessStatus.Error;
                     progressData.message = "File is not uploaded";
                     progressData.details = jqXhr.responseText;
+                    progressData.statusCode = jqXhr.status;
+                    progressData.statusText = jqXhr.statusText;
                     uploadFileProgress(progressData);
                 },
                 success: function (result, textStatus, jqXhr) {
