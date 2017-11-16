@@ -49,11 +49,12 @@
                 self._service.getStudiesDetails(self.options.reviewData, callback);
 
                 function callback(data) {
-                    if (data.status === ProcessStatus.Error) {
-                        self.options.onErrorEvent();
+                    if (data.processStatus === ProcessStatus.Error) {
+                        self.options.onErrorEvent(self._errorMessage(data));
                         console.log(data.message);
                         return;
                     }
+                    data = data.data;
                     if (data.length > 0) {
                         for (let i = 0; i < data.length; i++) {
                             data[i].Metadata = self._arrayOfNameValueToDictionary(data[i].Metadata);
@@ -83,11 +84,12 @@
                 self._service.getNonDicomsDetails(self.options.reviewData, callback);
 
                 function callback(data) {
-                    if (data.status === ProcessStatus.Error) {
-                        self.options.onErrorEvent();
+                    if (data.processStatus === ProcessStatus.Error) {
+                        self.options.onErrorEvent(self._errorMessage(data));
                         console.log(data.message);
                         return;
                     }
+                    data = data.data;
                     if (data.length > 0) {
                         for (let i = 0; i < data.length; i++) {
                             data[i].Metadata = self._arrayOfNameValueToDictionary(data[i].Metadata);
@@ -171,8 +173,8 @@
                                     self._service.deleteStudy(deleteUrl, callback);
 
                                     function callback(data) {
-                                        if (data.status === ProcessStatus.Error) {
-                                            self.options.onErrorEvent();
+                                        if (data.processStatus === ProcessStatus.Error) {
+                                            self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
                                             return;
                                         } else {
@@ -211,8 +213,8 @@
                                     self._service.deleteSeries(deleteUrl, callback);
 
                                     function callback(data) {
-                                        if (data.status === ProcessStatus.Error) {
-                                            self.options.onErrorEvent();
+                                        if (data.processStatus === ProcessStatus.Error) {
+                                            self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
                                             return;
                                         } else {
@@ -249,8 +251,8 @@
                                     self._service.deleteNonDicom(deleteUrl, callback);
 
                                     function callback(data) {
-                                        if (data.status === ProcessStatus.Error) {
-                                            self.options.onErrorEvent();
+                                        if (data.processStatus === ProcessStatus.Error) {
+                                            self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
                                             return;
                                         } else {
@@ -287,8 +289,8 @@
                                     self._service.deleteNonDicoms(deleteIds, callback);
 
                                     function callback(data) {
-                                        if (data.status === ProcessStatus.Error) {
-                                            self.options.onErrorEvent();
+                                        if (data.processStatus === ProcessStatus.Error) {
+                                            self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
                                             return;
                                         } else {
@@ -411,6 +413,29 @@
 
 
             _dictionaryStateOfCollapse: {},
+
+            _errorMessage: function (data) {
+                var errObj = {};
+                errObj.date = new Date();
+                errObj.step = ReviewProcessStep[data.processStep];
+                errObj.statusText = data.statusCode + " " + data.statusText;
+                errObj.message = data.details;
+
+                switch (data.processStep) {
+                case ReviewProcessStep.GettingStudies:
+                    break;
+                case ReviewProcessStep.GettingNonDicomFiles:
+                    break;
+                case ReviewProcessStep.DeletingStudies:
+                    break;
+                case ReviewProcessStep.DeletingSeries:
+                    break;
+                case ReviewProcessStep.DeletingNonDicomFiles:
+                    break;
+                }
+
+                return errObj;
+            },
 
             /////////////////////////////////////////////////////////////////////////
 

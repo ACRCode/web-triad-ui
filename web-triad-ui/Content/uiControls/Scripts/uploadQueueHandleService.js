@@ -29,16 +29,18 @@ var UploadQueueHandleService = (function () {
     var onUploadCompleted = [];
     var onQueueEmptied = [];
     var webService = null;
+    var onErrorEvent;
 
     var Statuses = { Pending: "Pending", InProgress: "InProgress", Completed: "Completed", Failed: "Failed" };
 
-    return{
-        init: function (_webService, _container) {
+    return {
+        init: function (_webService, _container, _onErrorEvent) {
             isUploadInProgress = false;
             uploadItems = [];
             onUploadCompleted = [];
             container = _container;
             webService = _webService;
+            onErrorEvent = _onErrorEvent;
         },
         addNewTask: function (files, uploadParameters) {
 
@@ -46,7 +48,7 @@ var UploadQueueHandleService = (function () {
                 throw new "Error. UploadQueueService was not initialized before using. Please call method init to initialize the service.";
 
             var guidOfFileset = getGuid();
-            var uploadTask = new UploadTask(files, guidOfFileset, uploadParameters, webService);
+            var uploadTask = new UploadTask(files, guidOfFileset, uploadParameters, webService, onErrorEvent);
 
             var newUploadItem = { id: guidOfFileset, task: uploadTask, status: Statuses.Pending };
             uploadItems.push(newUploadItem);
@@ -65,7 +67,7 @@ var UploadQueueHandleService = (function () {
 
             if (!isUploadInProgress) triggerUpload();
         },
-        addOnUploadCompletedHandler: function(onUploadCompletedFunc) {
+        addOnUploadCompletedHandler: function (onUploadCompletedFunc) {
             onUploadCompleted.push(onUploadCompletedFunc);
         },
         addOnQueueEmptiedHandler: function (onQueueEmptiedFunc) {
@@ -82,7 +84,7 @@ var UploadQueueHandleService = (function () {
         isUploadInProgress = true;
 
         var uploadItem = pullUploadItemFromQueue();
-        
+
         if (uploadItem == null) {
             isUploadInProgress = false;
             return;

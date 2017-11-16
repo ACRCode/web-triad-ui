@@ -22,7 +22,7 @@ if (!Array.prototype.findIndex) {
     };
 }
 
-function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
+function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onErrorEvent) {
 
     let waitingStatusText = "In Queue";
 
@@ -30,7 +30,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
     this._files = files;
     this._uploadParameters = uploadParameters;
     this._webService = webService;
-
+    this._onErrorEvent = onErrorEvent;
     this._isUploadInProgress = false;
 
     this._uploadStatusComponent;
@@ -107,7 +107,11 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
         self._uploadPromise.reject();
 
         self._webService.cancelUploadAndSubmitListOfFiles(self._cancelToken,
-            function () { console.log("File within upload with id = " + self._cancelToken + " was removed."); });
+            function (data) {
+                if (data.processStatus == ProcessStatus.Error) {
+                    self._onErrorEvent(self._errorMessage(data));
+                }
+            });
 
         self._uploadStatusComponent.showStatusWithRetryButton("Canceled", function () { self._retry(self); });
     }
@@ -171,6 +175,9 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
             self._isUploadInProgress = false;
             self._uploadStatusComponent.showStatusWithRetryButton("Failed", function () { self._retry(self); });
             defer.reject();
+
+            self._onErrorEvent(self._errorMessage(result));
+
             break;
         default:
         }
@@ -186,5 +193,24 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService) {
         let self = this;
         var removeOrCancelButton = $("tr[data-fileset-uid='" + self._guidOfFilesSet + "'] span.tc-cancel-or-remove-upload-from-queue");
         removeOrCancelButton.removeClass("tc-not-allowed");
+    }
+
+    this._errorMessage = function (data) {
+        var errObj = {};
+        errObj.date = new Date();
+        errObj.step = ProcessStep[data.processStep];
+        errObj.statusText = data.statusCode + " " + data.statusText;
+        errObj.message = data.details;
+
+        switch (data.processStep) {
+        case ProcessStep.Uploading:
+            break;
+        case ProcessStep.Processing:
+            break;
+        case ProcessStep.Canceling:
+            break;
+        }
+
+        return errObj;
     }
 }

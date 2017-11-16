@@ -15,6 +15,9 @@
             onFilesUploaded: function () {
                 console.log("On updated event handler was not added");
             },
+            onErrorEvent: function () {
+                console.log("On error event handler was not added");
+            },
             securityToken: null
         },
 
@@ -32,9 +35,9 @@
             self.setSecurityToken(token);
 
             var parsingPanel = this.element.find(".tc-uploadingPanel");
-            UploadQueueHandleService.init(self._service, parsingPanel.find("tbody"));
+            UploadQueueHandleService.init(self._service, parsingPanel.find("tbody"), self.options.onErrorEvent);
             UploadQueueHandleService.addOnUploadCompletedHandler(function (result) {
-                self._update(self, result);
+                self.options.onFilesUploaded(result);
             });
             UploadQueueHandleService.addOnQueueEmptiedHandler(function () { parsingPanel.hide(); });
         },
@@ -43,12 +46,6 @@
 
         _destroy: function () {
             this.element.html("");
-        },
-
-        /////////////////////////////////////////////////////////////////////////
-
-        _update: function (self, result) {
-            self.options.onFilesUploaded(result);
         },
 
         /////////////////////////////////////////////////////////////////////////

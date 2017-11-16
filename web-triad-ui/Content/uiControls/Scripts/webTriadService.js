@@ -261,10 +261,12 @@ var WebTriadService = (function () {
             error: function (jqXhr, textStatus, errorThrown) {
                 progressData.processStatus = ProcessStatus.Error;
                 progressData.message = jqXhr.responseText;
+                progressData.statusCode = jqXhr.status;
                 submissionProgress(progressData);
             },
             success: function (result, text, jqXhr) {
                 progressData.processStatus = ProcessStatus.InProgress;
+                progressData.statusCode = jqXhr.status;
                 submissionProgress(progressData);
                 self.waitForProcessingStudiesByServer(uri, submissionProgress);
             }
@@ -287,11 +289,13 @@ var WebTriadService = (function () {
                 },
                 error: function (jqXhr, textStatus, errorThrown) {
                     progressData.processStatus = ProcessStatus.Error;
+                    progressData.statusCode = jqXhr.status;
                     progressData.message = jqXhr.responseText;
                     getSubmissionPackageProgress(progressData);
                 },
                 success: function (result, text, jqXhr) {
                     progressData.processStatus = ProcessStatus.Success;
+                    progressData.statusCode = jqXhr.status;
                     progressData.additionalData = result;
                     getSubmissionPackageProgress(progressData);
                 }
@@ -411,6 +415,7 @@ var WebTriadService = (function () {
             error: function (jqXhr, textStatus, errorThrown) {
                 var data = {};
                 data.status = ProcessStatus.Error;
+                data.ProcessStep = ReviewProcessStep.GettingStudies;
                 data.message = jqXhr.responseText;
                 callback(data);
             },
@@ -437,6 +442,7 @@ var WebTriadService = (function () {
             error: function (jqXhr, textStatus, errorThrown) {
                 data.status = ProcessStatus.Error;
                 data.message = jqXhr.responseText;
+                data.ProcessStep = ReviewProcessStep.DeletingStudies;
                 callback(data);
             },
             success: function (result, textStatus, jqXhr) {
@@ -462,6 +468,7 @@ var WebTriadService = (function () {
             error: function (jqXhr, textStatus, errorThrown) {
                 data.status = ProcessStatus.Error;
                 data.message = jqXhr.responseText;
+                data.ProcessStep = ReviewProcessStep.DeletingSeries;
                 callback(data);
             },
             success: function (result, textStatus, jqXhr) {
@@ -487,6 +494,7 @@ var WebTriadService = (function () {
             error: function (jqXhr, textStatus, errorThrown) {
                 data.status = ProcessStatus.Error;
                 data.message = jqXhr.responseText;
+                data.ProcessStep = ReviewProcessStep.DeletingNonDicomFiles;
                 callback(data);
             },
             success: function (result, textStatus, jqXhr) {
@@ -499,7 +507,7 @@ var WebTriadService = (function () {
     WebTriadService.prototype.deleteNonDicoms = function (ids, callback) {
         var self = this;
         var arr = splitArray(ids, 300);
-        var _loop_1 = function(batch) {
+        var _loop_1 = function (batch) {
             var idsStr = batch.join();
             var data = {};
             $.ajax({
@@ -511,6 +519,7 @@ var WebTriadService = (function () {
                 error: function (jqXhr, textStatus, errorThrown) {
                     data.status = ProcessStatus.Error;
                     data.message = jqXhr.responseText;
+                    data.ProcessStep = ReviewProcessStep.DeletingNonDicomFiles;
                     callback(data);
                 },
                 success: function (result, textStatus, jqXhr) {
@@ -556,6 +565,7 @@ var WebTriadService = (function () {
                 var data = {};
                 data.status = ProcessStatus.Error;
                 data.message = jqXhr.responseText;
+                data.ProcessStep = ReviewProcessStep.GettingNonDicomFiles;
                 callback(data);
             },
             success: function (data, textStatus, jqXhr) {
@@ -863,6 +873,11 @@ var FileProgressData = (function () {
     }
     return FileProgressData;
 }());
+var ReviewProgressData = (function () {
+    function ReviewProgressData() {
+    }
+    return ReviewProgressData;
+}());
 var ListOfFilesForUpload = (function () {
     function ListOfFilesForUpload() {
     }
@@ -916,6 +931,14 @@ var ProcessStep;
     ProcessStep[ProcessStep["Processing"] = 1] = "Processing";
     ProcessStep[ProcessStep["Canceling"] = 2] = "Canceling";
 })(ProcessStep || (ProcessStep = {}));
+var ReviewProcessStep;
+(function (ReviewProcessStep) {
+    ReviewProcessStep[ReviewProcessStep["GettingStudies"] = 0] = "GettingStudies";
+    ReviewProcessStep[ReviewProcessStep["GettingNonDicomFiles"] = 1] = "GettingNonDicomFiles";
+    ReviewProcessStep[ReviewProcessStep["DeletingStudies"] = 2] = "DeletingStudies";
+    ReviewProcessStep[ReviewProcessStep["DeletingSeries"] = 3] = "DeletingSeries";
+    ReviewProcessStep[ReviewProcessStep["DeletingNonDicomFiles"] = 4] = "DeletingNonDicomFiles";
+})(ReviewProcessStep || (ReviewProcessStep = {}));
 var SubmissionTransactionStatus;
 (function (SubmissionTransactionStatus) {
     SubmissionTransactionStatus[SubmissionTransactionStatus["NotStarted"] = 0] = "NotStarted";
