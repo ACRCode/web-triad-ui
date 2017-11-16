@@ -12,8 +12,11 @@
                     nonDicomsDisabled: false
                 },
                 getSecurityToken: function () {
-                    console.log("getSecurityToken() not implemented");
+                    console.log("getSecurityToken() is not implemented");
                     return null;
+                },
+                onErrorEvent: function () {
+                    console.log("On error event handler was not added");
                 },
                 securityToken: null,
                 isImagesViewingAllowed: true,
@@ -21,15 +24,6 @@
             },
 
             _service: null,
-
-            setSecurityToken: function (token) {
-                if (token === null) return;
-                let self = this;
-                self.options.securityToken = token;
-                self._service.setSecurityToken(self.options.securityToken);
-            },
-
-            /////////////////////////////////////////////////////////////////////////
 
             _create: function () {
                 this.update(this.options);
@@ -40,6 +34,383 @@
             _destroy: function () {
                 this.element.html("");
             },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _getStudiesDetailsDef: function () {
+                let self = this;
+                var deferred = $.Deferred();
+                /////////
+                /////////
+                /////////
+                var token = self.options.getSecurityToken();
+                self.setSecurityToken(token);
+
+                self._service.getStudiesDetails(self.options.reviewData, callback);
+
+                function callback(data) {
+                    if (data.status === ProcessStatus.Error) {
+                        self.options.onErrorEvent();
+                        console.log(data.message);
+                        return;
+                    }
+                    if (data.length > 0) {
+                        for (let i = 0; i < data.length; i++) {
+                            data[i].Metadata = self._arrayOfNameValueToDictionary(data[i].Metadata);
+                            for (var j = 0; j < data[i].Series.length; j++) {
+                                data[i].Series[j].Metadata =
+                                    self._arrayOfNameValueToDictionary(data[i].Series[j].Metadata);
+                            }
+                        }
+                    }
+                    deferred.resolve(data);
+                }
+
+                return deferred.promise();
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _getNonDicomsDetailsDef: function () {
+                let self = this;
+                var deferred = $.Deferred();
+                /////////
+                /////////
+                /////////
+                var token = self.options.getSecurityToken();
+                self.setSecurityToken(token);
+
+                self._service.getNonDicomsDetails(self.options.reviewData, callback);
+
+                function callback(data) {
+                    if (data.status === ProcessStatus.Error) {
+                        self.options.onErrorEvent();
+                        console.log(data.message);
+                        return;
+                    }
+                    if (data.length > 0) {
+                        for (let i = 0; i < data.length; i++) {
+                            data[i].Metadata = self._arrayOfNameValueToDictionary(data[i].Metadata);
+                        }
+                    }
+                    deferred.resolve(data);
+                }
+
+                return deferred.promise();
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _bindEvent: function () {
+                var self = this;
+                ///////////////////////////////////////
+
+                self.element.find(".tc-collapse").each(function () {
+                    var that = $(this);
+                    that.click(function () {
+                        that.toggleClass("tc-expanded");
+                        self._dictionaryStateOfCollapse[that.closest("tr").attr("data-study-id")] =
+                            !self._dictionaryStateOfCollapse[that.closest("tr").attr("data-study-id")];
+                        that.closest("tr").next().find(".tc-series").slideToggle(100);
+
+                    });
+                });
+
+                ///////////////////////////////////////
+
+                self.element.find(".tc-open-image").each(function () {
+                    var that = $(this);
+                    that.click(function () {
+
+                        var studyId =
+                        {
+                            Name: "DicomDataStudyID",
+                            Value: that.closest("tr").attr("data-study-id")
+                        };
+
+                        var params = self.options.reviewData.concat(studyId);
+
+                        /////////
+                        /////////
+                        /////////
+                        var token = self.options.getSecurityToken();
+                        self.setSecurityToken(token);
+
+                        self._service.openViewer(params, callback);
+
+                        function callback(data) {
+                            if (data.status === ProcessStatus.Error) {
+                                //alert(data.message);
+                                console.log(data.message);
+                                return;
+                            }
+                        }
+                    });
+                });
+
+                ///////////////////////////////////////
+
+                self.element.find(".tc-delete-study").each(function () {
+                    var that = $(this);
+                    that.click(function () {
+
+                        var study_E = $(self._confirm_delete_studies_T);
+
+                        study_E.dialog({
+                            dialogClass: "no-close",
+                            resizable: false,
+                            height: "auto",
+                            width: 400,
+                            modal: true,
+                            buttons: {
+                                "Yes": function () {
+                                    var deleteUrl = that.attr("data-delete-link");
+                                    var token = self.options.getSecurityToken();
+                                    self.setSecurityToken(token);
+
+                                    self._service.deleteStudy(deleteUrl, callback);
+
+                                    function callback(data) {
+                                        if (data.status === ProcessStatus.Error) {
+                                            self.options.onErrorEvent();
+                                            console.log(data.message);
+                                            return;
+                                        } else {
+                                            self.update();
+                                        }
+                                    }
+
+                                    $(this).dialog("destroy");
+                                },
+                                "No": function () {
+                                    $(this).dialog("destroy");
+                                }
+                            }
+                        });
+                    });
+                });
+
+                ///////////////////////////////////////
+
+                self.element.find(".tc-delete-series").each(function () {
+                    var that = $(this);
+                    that.click(function () {
+                        var series_E = $(self._confirm_delete_series_T);
+                        series_E.dialog({
+                            dialogClass: "no-close",
+                            resizable: false,
+                            height: "auto",
+                            width: 400,
+                            modal: true,
+                            buttons: {
+                                "Yes": function () {
+                                    var deleteUrl = that.attr("data-delete-link");
+                                    var token = self.options.getSecurityToken();
+                                    self.setSecurityToken(token);
+
+                                    self._service.deleteSeries(deleteUrl, callback);
+
+                                    function callback(data) {
+                                        if (data.status === ProcessStatus.Error) {
+                                            self.options.onErrorEvent();
+                                            console.log(data.message);
+                                            return;
+                                        } else {
+                                            self.update();
+                                        }
+                                    }
+
+                                    $(this).dialog("destroy");
+                                },
+                                "No": function () {
+                                    $(this).dialog("destroy");
+                                }
+                            }
+                        });
+                    });
+                });
+
+                self.element.find(".tc-delete-non-dicom").each(function () {
+                    var that = $(this);
+                    that.click(function () {
+                        let dialog = $(self._confirm_delete_non_dicom_T);
+                        dialog.dialog({
+                            dialogClass: "no-close",
+                            resizable: false,
+                            height: "auto",
+                            width: 400,
+                            modal: true,
+                            buttons: {
+                                "Yes": function () {
+                                    var deleteUrl = that.attr("data-delete-link");
+                                    var token = self.options.getSecurityToken();
+                                    self.setSecurityToken(token);
+
+                                    self._service.deleteNonDicom(deleteUrl, callback);
+
+                                    function callback(data) {
+                                        if (data.status === ProcessStatus.Error) {
+                                            self.options.onErrorEvent();
+                                            console.log(data.message);
+                                            return;
+                                        } else {
+                                            self.update();
+                                        }
+                                    }
+
+                                    $(this).dialog("destroy");
+                                },
+                                "No": function () {
+                                    $(this).dialog("destroy");
+                                }
+                            }
+                        });
+                    });
+                });
+
+                self.element.find(".tc-delete-non-dicoms").each(function () {
+                    var that = $(this);
+                    that.click(function () {
+                        let dialog = $(self._confirm_delete_non_dicoms_T);
+                        dialog.dialog({
+                            dialogClass: "no-close",
+                            resizable: false,
+                            height: "auto",
+                            width: 400,
+                            modal: true,
+                            buttons: {
+                                "Yes": function () {
+                                    var deleteIds = that.attr("data-delete-links").split(" ");
+                                    var token = self.options.getSecurityToken();
+                                    self.setSecurityToken(token);
+
+                                    self._service.deleteNonDicoms(deleteIds, callback);
+
+                                    function callback(data) {
+                                        if (data.status === ProcessStatus.Error) {
+                                            self.options.onErrorEvent();
+                                            console.log(data.message);
+                                            return;
+                                        } else {
+                                            self.update();
+                                        }
+                                    }
+
+                                    $(this).dialog("destroy");
+                                },
+                                "No": function () {
+                                    $(this).dialog("destroy");
+                                }
+                            }
+                        });
+                    });
+                });
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _arrayOfNameValueToDictionary: function (data) {
+                var result = {};
+                for (let i = 0; i < data.length; i++) {
+                    result[data[i].Name] = data[i].Value;
+                }
+                return result;
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _spinner_T:
+                "<div class='tc-spinner'>" +
+                    "<div class='tc-loader'></div>" +
+                    "</div>",
+
+            _studies_T:
+                "<div class='tc-wrapper'>" +
+                    "<table class='tc-table-study'>" +
+                    "<caption>Uploaded DICOM Files</caption>" +
+                    "<thead><tr>" +
+                    "<th></th>" +
+                    "<th>Study Description</th>" +
+                    "<th style='width: 150px; text-align: center'>Study Date</th>" +
+                    "<th style='width: 200px; text-align: center'>Study Size</th>" +
+                    "<th id='studyImageViewColumnHeader' style='width: 100px; text-align: center'>Image</th>" +
+                    "<th id='studyRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
+                    "</tr></thead>" +
+                    "<tbody></tbody>" +
+                    "</table>" +
+                    "</div>",
+
+            _non_dicoms_T:
+                "<div class='tc-wrapper'>" +
+                    "<table class='tc-table-study'>" +
+                    "<caption>Uploaded Non-DICOM Files</caption>" +
+                    "<thead style='display: none'><tr>" +
+                    "<th></th>" +
+                    "<th></th>" +
+                    "<th style='width: 300px;'></th>" +
+                    "<th style='width: 200px;'></th>" +
+                    "<th id='fileRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
+                    "</tr></thead>" +
+                    "<tbody>" +
+                    "</tbody>" +
+                    "</table>" +
+                    "</div>",
+
+            _each_non_dicom_T:
+                "<tr><td colspan='7'>" +
+                    "<div class='tc-series'>" +
+                    "<table class='tc-table-series'>" +
+                    "<thead><tr>" +
+                    "<th></th>" +
+                    "<th>File Name</th>" +
+                    "<th style='width: 300px; text-align: center'>File Type</th>" +
+                    "<th style='width: 200px; text-align: center'>Size</th>" +
+                    "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
+                    "</tr></thead>" +
+                    "<tbody></tbody>" +
+                    "</table>" +
+                    "</div>" +
+                    "</td></tr>",
+
+            _series_T:
+                "<tr><td colspan='7'>" +
+                    "<div class='tc-series'>" +
+                    "<table class='tc-table-series'>" +
+                    "<thead><tr>" +
+                    "<th></th>" +
+                    "<th>Series Description</th>" +
+                    "<th style='width: 150px; text-align: center'>Modality</th>" +
+                    "<th style='width: 150px; text-align: center'>Series Date</th>" +
+                    "<th style='width: 200px; text-align: center'>No. of Files</th>" +
+                    "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
+                    "</tr></thead>" +
+                    "<tbody></tbody>" +
+                    "</table>" +
+                    "</div>" +
+                    "</td></tr>",
+
+            _confirm_delete_studies_T:
+                "<div id='dialog-confirm' style='display: none;'>" +
+                    "<p>All the series in this study will be deleted from this case. Please confirm.</p>" +
+                    "</div>",
+
+            _confirm_delete_series_T:
+                "<div id='dialog-confirm' style='display: none;'>" +
+                    "<p>Selected series will be deleted from this case. Please confirm.</p>" +
+                    "</div>",
+
+            _confirm_delete_non_dicom_T:
+                "<div id='dialog-confirm' style='display: none;'>" +
+                    "<p>This file will be deleted from the system. Please confirm.</p>" +
+                    "</div>",
+
+            _confirm_delete_non_dicoms_T:
+                "<div id='dialog-confirm' style='display: none;'>" +
+                    "<p>All the non-DICOM files will be deleted from the system. Please confirm.</p>" +
+                    "</div>",
+
+
+            _dictionaryStateOfCollapse: {},
 
             /////////////////////////////////////////////////////////////////////////
 
@@ -310,375 +681,12 @@
 
             /////////////////////////////////////////////////////////////////////////
 
-            _getStudiesDetailsDef: function () {
+            setSecurityToken: function (token) {
+                if (token === null) return;
                 let self = this;
-                var deferred = $.Deferred();
-                /////////
-                /////////
-                /////////
-                var token = self.options.getSecurityToken();
-                self.setSecurityToken(token);
+                self.options.securityToken = token;
+                self._service.setSecurityToken(self.options.securityToken);
+            }
 
-                self._service.getStudiesDetails(self.options.reviewData, callback);
-
-                function callback(data) {
-                    if (data.status === ProcessStatus.Error) {
-                        //alert(data.message);
-                        console.log(data.message);
-                        return;
-                    }
-                    if (data.length > 0) {
-                        for (let i = 0; i < data.length; i++) {
-                            data[i].Metadata = self._arrayOfNameValueToDictionary(data[i].Metadata);
-                            for (var j = 0; j < data[i].Series.length; j++) {
-                                data[i].Series[j].Metadata =
-                                    self._arrayOfNameValueToDictionary(data[i].Series[j].Metadata);
-                            }
-                        }
-                    }
-                    deferred.resolve(data);
-                }
-
-                return deferred.promise();
-            },
-
-            /////////////////////////////////////////////////////////////////////////
-
-            _getNonDicomsDetailsDef: function () {
-                let self = this;
-                var deferred = $.Deferred();
-                /////////
-                /////////
-                /////////
-                var token = self.options.getSecurityToken();
-                self.setSecurityToken(token);
-
-                self._service.getNonDicomsDetails(self.options.reviewData, callback);
-
-                function callback(data) {
-                    if (data.status === ProcessStatus.Error) {
-                        //alert(data.message);
-                        console.log(data.message);
-                        return;
-                    }
-                    if (data.length > 0) {
-                        for (let i = 0; i < data.length; i++) {
-                            data[i].Metadata = self._arrayOfNameValueToDictionary(data[i].Metadata);
-                        }
-                    }
-                    deferred.resolve(data);
-                }
-
-                return deferred.promise();
-            },
-
-            /////////////////////////////////////////////////////////////////////////
-
-            _bindEvent: function () {
-                var self = this;
-                ///////////////////////////////////////
-
-                self.element.find(".tc-collapse").each(function () {
-                    var that = $(this);
-                    that.click(function () {
-                        that.toggleClass("tc-expanded");
-                        self._dictionaryStateOfCollapse[that.closest("tr").attr("data-study-id")] =
-                            !self._dictionaryStateOfCollapse[that.closest("tr").attr("data-study-id")];
-                        that.closest("tr").next().find(".tc-series").slideToggle(100);
-
-                    });
-                });
-
-                ///////////////////////////////////////
-
-                self.element.find(".tc-open-image").each(function () {
-                    var that = $(this);
-                    that.click(function () {
-
-                        var studyId =
-                        {
-                            Name: "DicomDataStudyID",
-                            Value: that.closest("tr").attr("data-study-id")
-                        };
-
-                        var params = self.options.reviewData.concat(studyId);
-
-                        /////////
-                        /////////
-                        /////////
-                        var token = self.options.getSecurityToken();
-                        self.setSecurityToken(token);
-
-                        self._service.openViewer(params, callback);
-
-                        function callback(data) {
-                            if (data.status === ProcessStatus.Error) {
-                                //alert(data.message);
-                                console.log(data.message);
-                                return;
-                            }
-                        }
-                    });
-                });
-
-                ///////////////////////////////////////
-
-                self.element.find(".tc-delete-study").each(function () {
-                    var that = $(this);
-                    that.click(function () {
-
-                        var study_E = $(self._confirm_delete_studies_T);
-
-                        study_E.dialog({
-                            dialogClass: "no-close",
-                            resizable: false,
-                            height: "auto",
-                            width: 400,
-                            modal: true,
-                            buttons: {
-                                "Yes": function () {
-                                    var deleteUrl = that.attr("data-delete-link");
-                                    var token = self.options.getSecurityToken();
-                                    self.setSecurityToken(token);
-
-                                    self._service.deleteStudy(deleteUrl, callback);
-
-                                    function callback(data) {
-                                        if (data.status === ProcessStatus.Error) {
-                                            console.log(data.message);
-                                            return;
-                                        } else {
-                                            self.update();
-                                        }
-                                    }
-
-                                    $(this).dialog("destroy");
-                                },
-                                "No": function () {
-                                    $(this).dialog("destroy");
-                                }
-                            }
-                        });
-                    });
-                });
-
-                ///////////////////////////////////////
-
-                self.element.find(".tc-delete-series").each(function () {
-                    var that = $(this);
-                    that.click(function () {
-                        var series_E = $(self._confirm_delete_series_T);
-                        series_E.dialog({
-                            dialogClass: "no-close",
-                            resizable: false,
-                            height: "auto",
-                            width: 400,
-                            modal: true,
-                            buttons: {
-                                "Yes": function () {
-                                    var deleteUrl = that.attr("data-delete-link");
-                                    var token = self.options.getSecurityToken();
-                                    self.setSecurityToken(token);
-
-                                    self._service.deleteSeries(deleteUrl, callback);
-
-                                    function callback(data) {
-                                        if (data.status === ProcessStatus.Error) {
-                                            console.log(data.message);
-                                            return;
-                                        } else {
-                                            self.update();
-                                        }
-                                    }
-
-                                    $(this).dialog("destroy");
-                                },
-                                "No": function () {
-                                    $(this).dialog("destroy");
-                                }
-                            }
-                        });
-                    });
-                });
-
-                self.element.find(".tc-delete-non-dicom").each(function () {
-                    var that = $(this);
-                    that.click(function () {
-                        let dialog = $(self._confirm_delete_non_dicom_T);
-                        dialog.dialog({
-                            dialogClass: "no-close",
-                            resizable: false,
-                            height: "auto",
-                            width: 400,
-                            modal: true,
-                            buttons: {
-                                "Yes": function () {
-                                    var deleteUrl = that.attr("data-delete-link");
-                                    var token = self.options.getSecurityToken();
-                                    self.setSecurityToken(token);
-
-                                    self._service.deleteNonDicom(deleteUrl, callback);
-
-                                    function callback(data) {
-                                        if (data.status === ProcessStatus.Error) {
-                                            console.log(data.message);
-                                            return;
-                                        } else {
-                                            self.update();
-                                        }
-                                    }
-
-                                    $(this).dialog("destroy");
-                                },
-                                "No": function () {
-                                    $(this).dialog("destroy");
-                                }
-                            }
-                        });
-                    });
-                });
-
-                self.element.find(".tc-delete-non-dicoms").each(function () {
-                    var that = $(this);
-                    that.click(function () {
-                        let dialog = $(self._confirm_delete_non_dicoms_T);
-                        dialog.dialog({
-                            dialogClass: "no-close",
-                            resizable: false,
-                            height: "auto",
-                            width: 400,
-                            modal: true,
-                            buttons: {
-                                "Yes": function () {
-                                    var deleteIds = that.attr("data-delete-links").split(" ");
-                                    var token = self.options.getSecurityToken();
-                                    self.setSecurityToken(token);
-
-                                    self._service.deleteNonDicoms(deleteIds, callback);
-
-                                    function callback(data) {
-                                        if (data.status === ProcessStatus.Error) {
-                                            console.log(data.message);
-                                            return;
-                                        } else {
-                                            self.update();
-                                        }
-                                    }
-
-                                    $(this).dialog("destroy");
-                                },
-                                "No": function () {
-                                    $(this).dialog("destroy");
-                                }
-                            }
-                        });
-                    });
-                });
-            },
-
-            /////////////////////////////////////////////////////////////////////////
-
-            _arrayOfNameValueToDictionary: function (data) {
-                var result = {};
-                for (let i = 0; i < data.length; i++) {
-                    result[data[i].Name] = data[i].Value;
-                }
-                return result;
-            },
-
-            /////////////////////////////////////////////////////////////////////////
-
-            _spinner_T:
-                "<div class='tc-spinner'>" +
-                    "<div class='tc-loader'></div>" +
-                    "</div>",
-
-            _studies_T:
-                "<div class='tc-wrapper'>" +
-                    "<table class='tc-table-study'>" +
-                    "<caption>Uploaded DICOM Files</caption>" +
-                    "<thead><tr>" +
-                    "<th></th>" +
-                    "<th>Study Description</th>" +
-                    "<th style='width: 150px; text-align: center'>Study Date</th>" +
-                    "<th style='width: 200px; text-align: center'>Study Size</th>" +
-                    "<th id='studyImageViewColumnHeader' style='width: 100px; text-align: center'>Image</th>" +
-                    "<th id='studyRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
-                    "</tr></thead>" +
-                    "<tbody></tbody>" +
-                    "</table>" +
-                    "</div>",
-
-            _non_dicoms_T:
-                "<div class='tc-wrapper'>" +
-                    "<table class='tc-table-study'>" +
-                    "<caption>Uploaded Non-DICOM Files</caption>" +
-                    "<thead style='display: none'><tr>" +
-                    "<th></th>" +
-                    "<th></th>" +
-                    "<th style='width: 300px;'></th>" +
-                    "<th style='width: 200px;'></th>" +
-                    "<th id='fileRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
-                    "</tr></thead>" +
-                    "<tbody>" +
-                    "</tbody>" +
-                    "</table>" +
-                    "</div>",
-
-            _each_non_dicom_T:
-                "<tr><td colspan='7'>" +
-                    "<div class='tc-series'>" +
-                    "<table class='tc-table-series'>" +
-                    "<thead><tr>" +
-                    "<th></th>" +
-                    "<th>File Name</th>" +
-                    "<th style='width: 300px; text-align: center'>File Type</th>" +
-                    "<th style='width: 200px; text-align: center'>Size</th>" +
-                    "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
-                    "</tr></thead>" +
-                    "<tbody></tbody>" +
-                    "</table>" +
-                    "</div>" +
-                    "</td></tr>",
-
-            _series_T:
-                "<tr><td colspan='7'>" +
-                    "<div class='tc-series'>" +
-                    "<table class='tc-table-series'>" +
-                    "<thead><tr>" +
-                    "<th></th>" +
-                    "<th>Series Description</th>" +
-                    "<th style='width: 150px; text-align: center'>Modality</th>" +
-                    "<th style='width: 150px; text-align: center'>Series Date</th>" +
-                    "<th style='width: 200px; text-align: center'>No. of Files</th>" +
-                    "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
-                    "</tr></thead>" +
-                    "<tbody></tbody>" +
-                    "</table>" +
-                    "</div>" +
-                    "</td></tr>",
-
-            _confirm_delete_studies_T:
-                "<div id='dialog-confirm' style='display: none;'>" +
-                    "<p>All the series in this study will be deleted from this case. Please confirm.</p>" +
-                    "</div>",
-
-            _confirm_delete_series_T:
-                "<div id='dialog-confirm' style='display: none;'>" +
-                    "<p>Selected series will be deleted from this case. Please confirm.</p>" +
-                    "</div>",
-
-            _confirm_delete_non_dicom_T:
-                "<div id='dialog-confirm' style='display: none;'>" +
-                    "<p>This file will be deleted from the system. Please confirm.</p>" +
-                    "</div>",
-
-            _confirm_delete_non_dicoms_T:
-                "<div id='dialog-confirm' style='display: none;'>" +
-                    "<p>All the non-DICOM files will be deleted from the system. Please confirm.</p>" +
-                    "</div>",
-
-
-            _dictionaryStateOfCollapse: {}
         });
 })(jQuery, window, document);
