@@ -19,7 +19,7 @@
                     console.log("On error event handler was not added");
                 },
                 securityToken: null,
-                isImagesViewingAllowed: true,
+                isImagesViewingAllowed: false,
                 isImagesRemovingAllowed: false
             },
 
@@ -169,7 +169,7 @@
                                     var deleteUrl = that.attr("data-delete-link");
                                     var token = self.options.getSecurityToken();
                                     self.setSecurityToken(token);
-
+                                    that.addClass("tc-loader");
                                     self._service.deleteStudy(deleteUrl, callback);
 
                                     function callback(data) {
@@ -209,7 +209,7 @@
                                     var deleteUrl = that.attr("data-delete-link");
                                     var token = self.options.getSecurityToken();
                                     self.setSecurityToken(token);
-
+                                    that.addClass("tc-loader");
                                     self._service.deleteSeries(deleteUrl, callback);
 
                                     function callback(data) {
@@ -247,7 +247,7 @@
                                     var deleteUrl = that.attr("data-delete-link");
                                     var token = self.options.getSecurityToken();
                                     self.setSecurityToken(token);
-
+                                    that.addClass("tc-loader");
                                     self._service.deleteNonDicom(deleteUrl, callback);
 
                                     function callback(data) {
@@ -285,7 +285,7 @@
                                     var deleteIds = that.attr("data-delete-links").split(" ");
                                     var token = self.options.getSecurityToken();
                                     self.setSecurityToken(token);
-
+                                    that.addClass("tc-loader");
                                     self._service.deleteNonDicoms(deleteIds, callback);
 
                                     function callback(data) {
@@ -349,7 +349,6 @@
                     "<thead style='display: none'><tr>" +
                     "<th></th>" +
                     "<th></th>" +
-                    "<th style='width: 300px;'></th>" +
                     "<th style='width: 200px;'></th>" +
                     "<th id='fileRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
                     "</tr></thead>" +
@@ -619,9 +618,7 @@
                                 "<td>" +
                                 uploadedFilesStr +
                                 "</td>" +
-                                "<td style='text-align: right; width: 300px'>" +
-                                "</td>" +
-                                "<td style='text-align: center; width: 200px'>" +
+                                "<td style='text-align: center; width: 200px ;'>" +
                                 "Total Size: " +
                                 roundTotalSize +
                                 "</td>" +
