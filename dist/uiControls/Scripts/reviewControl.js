@@ -175,6 +175,7 @@
                                     function callback(data) {
                                         if (data.processStatus === ProcessStatus.Error) {
                                             self.options.onErrorEvent(self._errorMessage(data));
+                                            that.removeClass("tc-loader");
                                             console.log(data.message);
                                             return;
                                         } else {
@@ -216,6 +217,7 @@
                                         if (data.processStatus === ProcessStatus.Error) {
                                             self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
+                                            that.removeClass("tc-loader");
                                             return;
                                         } else {
                                             self.update();
@@ -254,6 +256,7 @@
                                         if (data.processStatus === ProcessStatus.Error) {
                                             self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
+                                            that.removeClass("tc-loader");
                                             return;
                                         } else {
                                             self.update();
@@ -292,6 +295,7 @@
                                         if (data.processStatus === ProcessStatus.Error) {
                                             self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
+                                            that.removeClass("tc-loader");
                                             return;
                                         } else {
                                             self.update();
