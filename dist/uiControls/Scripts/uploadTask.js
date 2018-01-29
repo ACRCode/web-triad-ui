@@ -38,7 +38,10 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
     this._isCanceled = false;
     this._cancelToken = null;
 
-    this._uploadPromise;
+    this._data = {
+        processing: null,
+        uploading: null
+    };
 
     this._rejectedAndCorruptedData = null;
 
@@ -80,11 +83,15 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
     this.execute = function () {
         let self = this;
 
-        self._uploadPromise = $.Deferred();
+        self._data.processing = $.Deferred();
+        self._data.uploading = $.Deferred();
 
         self._uploadFilesToServer();
 
-        return self._uploadPromise.promise();
+        self._data.processing.promise();
+        self._data.uploading.promise();
+
+        return self._data;
     }
 
     this._uploadFilesToServer = function () {
@@ -95,7 +102,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
         self._uploadStatusComponent.showProgressBar();
 
         self._cancelToken = self._webService.submitFiles(files, self._uploadParameters,
-            function (result) { self._handleUploadProgress(result, self._uploadPromise); });
+            function (result) { self._handleUploadProgress(result, self._data); });
     }
 
     this._cancelUpload = function () {
@@ -104,7 +111,8 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
         self._isCanceled = true;
         self._isUploadInProgress = false;
         self._rejectedAndCorruptedData = null;
-        self._uploadPromise.reject();
+        self._data.processing.reject();
+        self._data.uploading.reject();
 
         self._webService.cancelUploadAndSubmitListOfFiles(self._cancelToken,
             function (data) {
@@ -151,15 +159,17 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
                 if (totalRejectedFiles != 0) statusString += totalRejectedFiles + " file(s) rejected to upload";
                 self._uploadStatusComponent.showStatus(statusString);
                 self._rejectedAndCorruptedData = result.rejectedAndCorruptedData;
-                defer.resolve(self._rejectedAndCorruptedData);
+                defer.processing.resolve(self._rejectedAndCorruptedData);
                 self._showRemoveOrCancelButton();
                 break;
             case ProcessStep.Uploading:
                 self._uploadStatusComponent.updateProgressBar(result.progress);
                 self._isUploadInProgress = false;
+                defer.uploading.resolve();
                 break;
             case ProcessStep.Canceling:
-                defer.reject();
+                defer.processing.reject();
+                defer.uploading.reject();
                 break;
             }
             break;
@@ -174,7 +184,8 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
         case ProcessStatus.Error:
             self._isUploadInProgress = false;
             self._uploadStatusComponent.showStatusWithRetryButton("Failed", function () { self._retry(self); });
-            defer.reject();
+            defer.processing.reject();
+            defer.uploading.reject();
 
             self._onErrorEvent(self._errorMessage(result));
 

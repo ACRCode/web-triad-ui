@@ -445,6 +445,9 @@
             update: function (options) {
                 let self = this;
 
+                let deleteDicomDisabledMessage = "Processing study data. 'Delete' will be enabled after processing is complete.";
+                let deleteNonDicomDisabledMessage = "Processing data. 'Delete' will be enabled after processing is complete.";
+
                 $.extend(self.options, options);
 
                 var studies_E = $(self._studies_T);
@@ -513,7 +516,9 @@
                                             ? "<td style='text-align: center;'><span class='tc-delete-study' data-delete-link ='" +
                                             data[i]._links.delete.href +
                                             "'></span></td>"
-                                            : "<td style='text-align: center;'><span class='tc-delete-study tc-not-allowed'></span></td>"
+                                            : "<td style='text-align: center;' " +
+                                            "title = '" + deleteDicomDisabledMessage + "'>" +
+                                            "<span class='tc-delete-study tc-not-allowed'></span></td>"
                                         )
                                         : "") +
                                     "</tr>"
@@ -556,7 +561,10 @@
                                                 ? "<td style='text-align: center;'><span class='tc-delete-series' data-delete-link ='" +
                                                 data[i].Series[j]._links.delete.href +
                                                 "'></span></td>"
-                                                : "<td style='text-align: center;'><span class='tc-delete-series tc-not-allowed'></span></td>"
+                                                : "<td style='text-align: center;' " +
+                                                "title = '" + deleteDicomDisabledMessage + "'>" +
+                                                "<span class='tc-delete-series tc-not-allowed'>" +
+                                                "</span></td>"
                                             )
                                             : "") +
                                         "</tr>"
@@ -631,7 +639,10 @@
                                         ? "<td style='text-align: center; width: 100px'><span class='tc-delete-non-dicoms' data-delete-links ='" +
                                         deleteLinks +
                                         "'></span></td>"
-                                        : "<td style='text-align: center; width: 100px'><span class='tc-delete-non-dicoms tc-not-allowed'></span></td>"
+                                        : "<td style='text-align: center; width: 100px' " +
+                                        "title = '" + deleteNonDicomDisabledMessage + "'>" +
+                                        "<span class='tc-delete-non-dicoms tc-not-allowed'>" +
+                                        "</span></td>"
                                     )
                                     : "") +
                                 "</tr>"
@@ -673,7 +684,10 @@
                                             ? "<td style='text-align: center;'><span class='tc-delete-non-dicom' data-delete-link ='" +
                                             data[i]._links.delete.href +
                                             "'></span></td>"
-                                            : "<td style='text-align: center;'><span class='tc-delete-non-dicom tc-not-allowed'></span></td>"
+                                            : "<td style='text-align: center;' " +
+                                            "title = '" + deleteNonDicomDisabledMessage + "'>" +
+                                            "<span class='tc-delete-non-dicom tc-not-allowed'>" +
+                                            "</span></td>"
                                         )
                                         : "") +
                                     "</tr>"

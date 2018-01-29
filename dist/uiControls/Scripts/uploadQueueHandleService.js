@@ -90,11 +90,19 @@ var UploadQueueHandleService = (function () {
             return;
         }
 
-        var taskExecutionPromise = uploadItem.task.execute();
-        $.when(taskExecutionPromise)
+        var data = uploadItem.task.execute();
+
+        $.when(data.processing)
             .done(function (result) {
-                uploadItem.status = Statuses.Completed;
                 onUploadCompleted.forEach(function (func) { func(result); });
+            })
+            .fail(function () {
+                uploadItem.status = Statuses.Failed;
+            });
+
+        $.when(data.uploading)
+            .done(function () {
+                uploadItem.status = Statuses.Completed;
             })
             .fail(function () {
                 uploadItem.status = Statuses.Failed;
