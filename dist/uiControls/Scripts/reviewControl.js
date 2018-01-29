@@ -517,7 +517,7 @@
                                             data[i]._links.delete.href +
                                             "'></span></td>"
                                             : "<td style='text-align: center;' " +
-                                            "title = '" + deleteDicomDisabledMessage + "'>" +
+                                            'title = "' + deleteDicomDisabledMessage + '">' +
                                             "<span class='tc-delete-study tc-not-allowed'></span></td>"
                                         )
                                         : "") +
@@ -562,7 +562,7 @@
                                                 data[i].Series[j]._links.delete.href +
                                                 "'></span></td>"
                                                 : "<td style='text-align: center;' " +
-                                                "title = '" + deleteDicomDisabledMessage + "'>" +
+                                                'title = "' + deleteDicomDisabledMessage + '">' +
                                                 "<span class='tc-delete-series tc-not-allowed'>" +
                                                 "</span></td>"
                                             )
@@ -640,7 +640,7 @@
                                         deleteLinks +
                                         "'></span></td>"
                                         : "<td style='text-align: center; width: 100px' " +
-                                        "title = '" + deleteNonDicomDisabledMessage + "'>" +
+                                        'title = "' + deleteNonDicomDisabledMessage + '">' +
                                         "<span class='tc-delete-non-dicoms tc-not-allowed'>" +
                                         "</span></td>"
                                     )
@@ -685,7 +685,7 @@
                                             data[i]._links.delete.href +
                                             "'></span></td>"
                                             : "<td style='text-align: center;' " +
-                                            "title = '" + deleteNonDicomDisabledMessage + "'>" +
+                                            'title = "' + deleteNonDicomDisabledMessage + '">' +
                                             "<span class='tc-delete-non-dicom tc-not-allowed'>" +
                                             "</span></td>"
                                         )
