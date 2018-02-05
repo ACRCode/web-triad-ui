@@ -154,9 +154,11 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
                     result.rejectedAndCorruptedData.NumberOfRejectedDicoms +
                     result.rejectedAndCorruptedData.NumberOfRejectedNonDicoms +
                     result.rejectedAndCorruptedData.NumberOfRejectedDicomDir;
-                var statusString = self._files.length - totalRejectedFiles
+                var totalIgnoredFiles = result.rejectedAndCorruptedData.NumberOfDuplicateDicoms;
+                var statusString = self._files.length - totalRejectedFiles - totalIgnoredFiles
                     + " file(s) uploaded successfully. ";
-                if (totalRejectedFiles != 0) statusString += totalRejectedFiles + " file(s) rejected to upload";
+                if (totalRejectedFiles != 0) statusString += totalRejectedFiles + " file(s) rejected to upload. ";
+                if (totalIgnoredFiles != 0) statusString += totalIgnoredFiles + " duplicate file(s) were ignored. ";
                 self._uploadStatusComponent.showStatus(statusString);
                 self._rejectedAndCorruptedData = result.rejectedAndCorruptedData;
                 defer.processing.resolve(self._rejectedAndCorruptedData);
