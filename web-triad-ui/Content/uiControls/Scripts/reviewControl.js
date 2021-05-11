@@ -327,92 +327,95 @@
 
             _spinner_T:
                 "<div class='tc-spinner'>" +
-                    "<div class='tc-loader'></div>" +
-                    "</div>",
+                "<div class='tc-loader'></div>" +
+                "</div>",
 
             _studies_T:
                 "<div class='tc-wrapper'>" +
-                    "<table class='tc-table-study'>" +
-                    "<caption>Uploaded DICOM Files</caption>" +
-                    "<thead><tr>" +
-                    "<th></th>" +
-                    "<th>Study Description</th>" +
-                    "<th style='width: 150px; text-align: center'>Study Date</th>" +
-                    "<th style='width: 200px; text-align: center'>Study Size</th>" +
-                    "<th id='studyImageViewColumnHeader' style='width: 100px; text-align: center'>Image</th>" +
-                    "<th id='studyRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
-                    "</tr></thead>" +
-                    "<tbody></tbody>" +
-                    "</table>" +
-                    "</div>",
+                "<table class='tc-table-study'>" +
+                "<caption>Uploaded DICOM Files</caption>" +
+                "<thead><tr>" +
+                "<th></th>" +
+                "<th>Study Description</th>" +
+                "<th style='width: 120px; text-align: center'>Study Date</th>" +
+                "<th style='width: 120px; text-align: center'>Submitted Date</th>" +
+                "<th style='width: 150px; text-align: center'>Study Size</th>" +
+                "<th id='studyImageViewColumnHeader' style='width: 100px; text-align: center'>Image</th>" +
+                "<th id='studyRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
+                "</tr></thead>" +
+                "<tbody></tbody>" +
+                "</table>" +
+                "</div>",
 
             _non_dicoms_T:
                 "<div class='tc-wrapper'>" +
-                    "<table class='tc-table-study'>" +
-                    "<caption>Uploaded Non-DICOM Files</caption>" +
-                    "<thead style='display: none'><tr>" +
-                    "<th></th>" +
-                    "<th></th>" +
-                    "<th style='width: 200px;'></th>" +
-                    "<th id='fileRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
-                    "</tr></thead>" +
-                    "<tbody>" +
-                    "</tbody>" +
-                    "</table>" +
-                    "</div>",
+                "<table class='tc-table-study'>" +
+                "<caption>Uploaded Non-DICOM Files</caption>" +
+                "<thead style='display: none'><tr>" +
+                "<th></th>" +
+                "<th></th>" +
+                "<th style='width: 200px;'></th>" +
+                "<th id='fileRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
+                "</tr></thead>" +
+                "<tbody>" +
+                "</tbody>" +
+                "</table>" +
+                "</div>",
 
             _each_non_dicom_T:
                 "<tr><td colspan='7'>" +
-                    "<div class='tc-series'>" +
-                    "<table class='tc-table-series'>" +
-                    "<thead><tr>" +
-                    "<th></th>" +
-                    "<th>File Name</th>" +
-                    "<th style='width: 300px; text-align: center'>File Type</th>" +
-                    "<th style='width: 200px; text-align: center'>Size</th>" +
-                    "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
-                    "</tr></thead>" +
-                    "<tbody></tbody>" +
-                    "</table>" +
-                    "</div>" +
-                    "</td></tr>",
+                "<div class='tc-series'>" +
+                "<table class='tc-table-series'>" +
+                "<thead><tr>" +
+                "<th></th>" +
+                "<th>File Name</th>" +
+                "<th style='width: 200px; text-align: center'>File Type</th>" +
+                "<th style='width: 120px; text-align: center'>Submitted Date</th>" +
+                "<th style='width: 150px; text-align: center'>Size</th>" +
+                "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
+                "</tr></thead>" +
+                "<tbody></tbody>" +
+                "</table>" +
+                "</div>" +
+                "</td></tr>",
 
             _series_T:
                 "<tr><td colspan='7'>" +
-                    "<div class='tc-series'>" +
-                    "<table class='tc-table-series'>" +
-                    "<thead><tr>" +
-                    "<th></th>" +
-                    "<th>Series Description</th>" +
-                    "<th style='width: 150px; text-align: center'>Modality</th>" +
-                    "<th style='width: 150px; text-align: center'>Series Date</th>" +
-                    "<th style='width: 200px; text-align: center'>No. of Files</th>" +
-                    "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
-                    "</tr></thead>" +
-                    "<tbody></tbody>" +
-                    "</table>" +
-                    "</div>" +
-                    "</td></tr>",
+                "<div class='tc-series'>" +
+                "<table class='tc-table-series'>" +
+                "<thead><tr>" +
+                "<th></th>" +
+                "<th>Series Description</th>" +
+                "<th style='width: 80px; text-align: center'>Modality</th>" +
+                "<th style='width: 120px; text-align: center'>Series Date</th>" +
+                "<th style='width: 120px; text-align: center'>Submitted Date</th>" +
+                "<th style='width: 150px; text-align: center'>No. of Files</th>" +
+                "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
+                "</tr></thead>" +
+                "<tbody></tbody>" +
+                "</table>" +
+                "</div>" +
+                "</td></tr>",
 
             _confirm_delete_studies_T:
                 "<div id='dialog-confirm' style='display: none;'>" +
-                    "<p>All the series in this study will be deleted from this case. Please confirm.</p>" +
-                    "</div>",
+                "<p>All the series in this study will be deleted from this case. Please confirm.</p>" +
+                "</div>",
 
             _confirm_delete_series_T:
                 "<div id='dialog-confirm' style='display: none;'>" +
-                    "<p>Selected series will be deleted from this case. Please confirm.</p>" +
-                    "</div>",
+                "<p>Selected series will be deleted from this case. Please confirm.</p>" +
+                "</div>",
 
             _confirm_delete_non_dicom_T:
                 "<div id='dialog-confirm' style='display: none;'>" +
-                    "<p>This file will be deleted from the system. Please confirm.</p>" +
-                    "</div>",
+                "<p>This file will be deleted from the system. Please confirm.</p>" +
+                "</div>",
 
             _confirm_delete_non_dicoms_T:
                 "<div id='dialog-confirm' style='display: none;'>" +
-                    "<p>All the non-DICOM files will be deleted from the system. Please confirm.</p>" +
-                    "</div>",
+                "<p>All the non-DICOM files will be deleted from the system. Please confirm.</p>" +
+                "</div>",
 
 
             _dictionaryStateOfCollapse: {},
@@ -425,16 +428,16 @@
                 errObj.message = data.details;
 
                 switch (data.processStep) {
-                case ReviewProcessStep.GettingStudies:
-                    break;
-                case ReviewProcessStep.GettingNonDicomFiles:
-                    break;
-                case ReviewProcessStep.DeletingStudies:
-                    break;
-                case ReviewProcessStep.DeletingSeries:
-                    break;
-                case ReviewProcessStep.DeletingNonDicomFiles:
-                    break;
+                    case ReviewProcessStep.GettingStudies:
+                        break;
+                    case ReviewProcessStep.GettingNonDicomFiles:
+                        break;
+                    case ReviewProcessStep.DeletingStudies:
+                        break;
+                    case ReviewProcessStep.DeletingSeries:
+                        break;
+                    case ReviewProcessStep.DeletingNonDicomFiles:
+                        break;
                 }
 
                 return errObj;
@@ -506,6 +509,9 @@
                                     data[i].Metadata.StudyDate +
                                     "</td>" +
                                     "<td style='text-align: center;'>" +
+                                    data[i].Metadata.SubmittedDate +
+                                    "</td>" +
+                                    "<td style='text-align: center;'>" +
                                     size +
                                     "</td>" +
                                     ((self.options.isImagesViewingAllowed)
@@ -552,6 +558,9 @@
                                         "</td>" +
                                         "<td style='text-align: center;'>" +
                                         data[i].Series[j].Metadata.SeriesDate +
+                                        "</td>" +
+                                        "<td style='text-align: center;'>" +
+                                        data[i].Series[j].Metadata.SubmittedDate +
                                         "</td>" +
                                         "<td style='text-align: center;'>" +
                                         data[i].Series[j].Metadata.NoOfObjects +
@@ -675,6 +684,9 @@
                                     "</td>" +
                                     "<td style='text-align: center;'>" +
                                     data[i].Metadata.Type +
+                                    "</td>" +
+                                    "<td style='text-align: center;'>" +
+                                    data[i].Metadata.SubmittedDate +
                                     "</td>" +
                                     "<td style='text-align: center;'>" +
                                     size +
