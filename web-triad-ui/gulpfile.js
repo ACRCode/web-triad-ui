@@ -13,24 +13,22 @@ var config = {
     webtriadservicebundle: 'Content//webTriadService.js' 
 }
 
+//Restore all bower packages
+gulp.task('bower-restore', gulp.series(async function () {
+    return bower();
+}));
+
 // Synchronously delete the output script file(s)
-gulp.task('clean-vendor-scripts', ['bower-restore'], function () {
+gulp.task('clean-vendor-scripts', gulp.series('bower-restore', async function () {
     return del([config.webtriadservicebundle]);
-});
+}));
 
 //Create a uploader API lib
-gulp.task('webtriadservice', ['clean-vendor-scripts'], function () {
+gulp.task('webtriadservice', gulp.series('clean-vendor-scripts',  async function () {
     return gulp.src(config.webtriadservicesrc)
         .pipe(concat('webTriadService.js'))
         .pipe(gulp.dest('Content/uiControls/Scripts'));
-});
-
-//Restore all bower packages
-gulp.task('bower-restore', function () {
-    return bower();
-});
+}));
 
 //Set a default tasks 
-gulp.task('default', ['webtriadservice'], function () {
-
-});
+gulp.task('default', gulp.series('webtriadservice'));
