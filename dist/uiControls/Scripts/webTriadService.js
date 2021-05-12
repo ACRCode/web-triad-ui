@@ -1,5 +1,9 @@
-var WebTriadService = (function () {
+var WebTriadService = /** @class */ (function () {
     //////////////////////////////////////////////////////////////////////////
+    /**
+    * Initialize Web TRIAD Client
+    * @param {IServiceSettings} serviceSettings
+    */
     function WebTriadService(serviceSettings) {
         this.self = this;
         this.fileApiUrl = "/files";
@@ -29,6 +33,13 @@ var WebTriadService = (function () {
         this.listsOfFiles = {};
     }
     ////////////////////////////////////////////
+    /**
+    * Sends files to Web TRIAD
+    * @param {IFileExt[]} files
+    * @param {ItemData[]} metadata
+    * @param {(progressData: SubmissionProgressData) => void} uploadAndSubmitListOfFilesProgress
+    * @returns {string}
+    */
     WebTriadService.prototype.submitFiles = function (files, metadata, uploadAndSubmitListOfFilesProgress) {
         var id = this.addListOfFilesForUpload(files);
         this.uploadAndSubmitListOfFiles(id, metadata, uploadAndSubmitListOfFilesProgress);
@@ -275,7 +286,6 @@ var WebTriadService = (function () {
                 progressData.processStatus = ProcessStatus.InProgress;
                 progressData.statusCode = jqXhr.status;
                 submissionProgress(progressData);
-                self.waitForProcessingStudiesByServer(uri, submissionProgress);
             }
         });
     };
@@ -532,7 +542,7 @@ var WebTriadService = (function () {
     WebTriadService.prototype.deleteNonDicoms = function (ids, callback) {
         var self = this;
         var arr = splitArray(ids, 300);
-        var _loop_1 = function(batch) {
+        var _loop_1 = function (batch) {
             var idsStr = batch.join();
             var progressData = new ReviewProgressData();
             progressData.processStep = ReviewProcessStep.DeletingNonDicomFiles;
@@ -862,33 +872,6 @@ var WebTriadService = (function () {
                 break;
         }
     };
-    ////////////////////////////isDicom() is not used
-    WebTriadService.prototype.isDicom = function (file) {
-        var deferred = $.Deferred();
-        var chunk = file.slice(128, 132);
-        var reader = new FileReader();
-        reader.onload = function () {
-            var blob = reader.result;
-            var byteArray = new Uint8Array(blob);
-            var result = "";
-            var byte;
-            for (var i = 0; i < 4; i++) {
-                byte = byteArray[i];
-                if (byte === 0) {
-                    break;
-                }
-                result += String.fromCharCode(byte);
-            }
-            if (result !== "DICM") {
-                deferred.resolve(false);
-            }
-            else {
-                deferred.resolve(true);
-            }
-        };
-        reader.readAsArrayBuffer(chunk);
-        return deferred.promise();
-    };
     WebTriadService.prototype.arrayOfNameValueToDictionary = function (data) {
         var result = {};
         for (var i = 0; i < data.length; i++) {
@@ -899,37 +882,37 @@ var WebTriadService = (function () {
     return WebTriadService;
 }());
 ////////////////////////////////////////////////////////////////////////////////////
-var SubmissionProgressData = (function () {
+var SubmissionProgressData = /** @class */ (function () {
     function SubmissionProgressData() {
     }
     return SubmissionProgressData;
 }());
-var FileProgressData = (function () {
+var FileProgressData = /** @class */ (function () {
     function FileProgressData() {
     }
     return FileProgressData;
 }());
-var ReviewProgressData = (function () {
+var ReviewProgressData = /** @class */ (function () {
     function ReviewProgressData() {
     }
     return ReviewProgressData;
 }());
-var ListOfFilesForUpload = (function () {
+var ListOfFilesForUpload = /** @class */ (function () {
     function ListOfFilesForUpload() {
     }
     return ListOfFilesForUpload;
 }());
-var PackageOfFilesForUpload = (function () {
+var PackageOfFilesForUpload = /** @class */ (function () {
     function PackageOfFilesForUpload() {
     }
     return PackageOfFilesForUpload;
 }());
-var InitialSubmissionPackageResource = (function () {
+var InitialSubmissionPackageResource = /** @class */ (function () {
     function InitialSubmissionPackageResource() {
     }
     return InitialSubmissionPackageResource;
 }());
-var SubmissionPackage = (function () {
+var SubmissionPackage = /** @class */ (function () {
     function SubmissionPackage() {
     }
     return SubmissionPackage;
@@ -940,7 +923,7 @@ var SubmissionPackageStatus;
     SubmissionPackageStatus[SubmissionPackageStatus["Complete"] = 1] = "Complete";
     SubmissionPackageStatus[SubmissionPackageStatus["Failed"] = 2] = "Failed";
 })(SubmissionPackageStatus || (SubmissionPackageStatus = {}));
-var ItemData = (function () {
+var ItemData = /** @class */ (function () {
     function ItemData() {
     }
     return ItemData;

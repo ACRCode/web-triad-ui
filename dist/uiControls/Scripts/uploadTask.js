@@ -143,56 +143,72 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
         return filesNames;
     }
 
+    this._getFileAttributes = function () {
+        let self = this;
+
+        var filesAttributes = [];
+        for (let i = 0; i < self._files.length; i++) {
+            var item = {
+                name: self._files[i].name,
+                type: self._files[i].type,
+                size: self._files[i].size
+            }
+            filesAttributes.push(item);
+        }
+
+        return filesAttributes;
+    }
+
     this._handleUploadProgress = function (result, defer) {
         let self = this;
 
         switch (result.processStatus) {
-        case ProcessStatus.Success:
-            switch (result.processStep) {
-            case ProcessStep.Processing:
-                var totalRejectedFiles = result.rejectedAndCorruptedData.NumberOfCorruptedDicoms +
-                    result.rejectedAndCorruptedData.NumberOfRejectedDicoms +
-                    result.rejectedAndCorruptedData.NumberOfRejectedNonDicoms +
-                    result.rejectedAndCorruptedData.NumberOfRejectedDicomDir;
-                var totalIgnoredFiles = result.rejectedAndCorruptedData.NumberOfDuplicateDicoms;
-                var statusString = self._files.length - totalRejectedFiles - totalIgnoredFiles
-                    + " file(s) uploaded successfully. ";
-                if (totalRejectedFiles != 0) statusString += totalRejectedFiles + " file(s) rejected to upload. ";
-                if (totalIgnoredFiles != 0) statusString += totalIgnoredFiles + " duplicate file(s) were ignored. ";
-                self._uploadStatusComponent.showStatus(statusString);
-                self._rejectedAndCorruptedData = result.rejectedAndCorruptedData;
-                defer.processing.resolve(self._rejectedAndCorruptedData);
-                self._showRemoveOrCancelButton();
+            case ProcessStatus.Success:
+                switch (result.processStep) {
+                    case ProcessStep.Processing:
+                        var totalRejectedFiles = result.rejectedAndCorruptedData.NumberOfCorruptedDicoms +
+                            result.rejectedAndCorruptedData.NumberOfRejectedDicoms +
+                            result.rejectedAndCorruptedData.NumberOfRejectedNonDicoms +
+                            result.rejectedAndCorruptedData.NumberOfRejectedDicomDir;
+                        var totalIgnoredFiles = result.rejectedAndCorruptedData.NumberOfDuplicateDicoms;
+                        var statusString = self._files.length - totalRejectedFiles - totalIgnoredFiles
+                            + " file(s) uploaded successfully. ";
+                        if (totalRejectedFiles != 0) statusString += totalRejectedFiles + " file(s) rejected to upload. ";
+                        if (totalIgnoredFiles != 0) statusString += totalIgnoredFiles + " duplicate file(s) were ignored. ";
+                        self._uploadStatusComponent.showStatus(statusString);
+                        self._rejectedAndCorruptedData = result.rejectedAndCorruptedData;
+                        defer.processing.resolve(self._rejectedAndCorruptedData);
+                        self._showRemoveOrCancelButton();
+                        break;
+                    case ProcessStep.Uploading:
+                        self._uploadStatusComponent.updateProgressBar(result.progress);
+                        self._isUploadInProgress = false;
+                        defer.uploading.resolve(self._getFileAttributes());
+                        break;
+                    case ProcessStep.Canceling:
+                        defer.processing.reject();
+                        defer.uploading.reject();
+                        break;
+                }
                 break;
-            case ProcessStep.Uploading:
+            case ProcessStatus.InProgress:
+                if (result.processStep == ProcessStep.Processing) {
+                    var statusString = self._files.length + " file(s) successfully uploaded to server and currently being processed. ";
+                    self._uploadStatusComponent.showStatus(statusString);
+                    break;
+                }
                 self._uploadStatusComponent.updateProgressBar(result.progress);
-                self._isUploadInProgress = false;
-                defer.uploading.resolve();
                 break;
-            case ProcessStep.Canceling:
+            case ProcessStatus.Error:
+                self._isUploadInProgress = false;
+                self._uploadStatusComponent.showStatusWithRetryButton("Failed", function () { self._retry(self); });
                 defer.processing.reject();
                 defer.uploading.reject();
-                break;
-            }
-            break;
-        case ProcessStatus.InProgress:
-            if (result.processStep == ProcessStep.Processing) {
-                self._hideRemoveOrCancelButton();
-                self._uploadStatusComponent.showStatusWithSpinner("Processing files..");
-                break;
-            }
-            self._uploadStatusComponent.updateProgressBar(result.progress);
-            break;
-        case ProcessStatus.Error:
-            self._isUploadInProgress = false;
-            self._uploadStatusComponent.showStatusWithRetryButton("Failed", function () { self._retry(self); });
-            defer.processing.reject();
-            defer.uploading.reject();
 
-            self._onErrorEvent(self._errorMessage(result));
+                self._onErrorEvent(self._errorMessage(result));
 
-            break;
-        default:
+                break;
+            default:
         }
     }
 
@@ -216,12 +232,12 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
         errObj.message = data.details;
 
         switch (data.processStep) {
-        case ProcessStep.Uploading:
-            break;
-        case ProcessStep.Processing:
-            break;
-        case ProcessStep.Canceling:
-            break;
+            case ProcessStep.Uploading:
+                break;
+            case ProcessStep.Processing:
+                break;
+            case ProcessStep.Canceling:
+                break;
         }
 
         return errObj;

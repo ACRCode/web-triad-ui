@@ -13,7 +13,10 @@
                 return null;
             },
             onFilesUploaded: function () {
-                console.log("On updated event handler was not added");
+                console.log("On uploaded event handler was not added");
+            },
+            onFilesSubmitted: function () {
+                console.log("On submitted event handler was not added");
             },
             onErrorEvent: function () {
                 console.log("On error event handler was not added");
@@ -26,8 +29,8 @@
         _create: function () {
             let self = this;
 
-            var studies_E = $(self._studies_T);
-            self.element.html(studies_E);
+            var upload_queue_E = $(self._upload_queue_T);
+            self.element.html(upload_queue_E);
 
             self._service = new WebTriadService(self.options.serviceParam);
 
@@ -36,6 +39,9 @@
 
             var parsingPanel = this.element.find(".tc-uploadingPanel");
             UploadQueueHandleService.init(self._service, parsingPanel.find("tbody"), self.options.onErrorEvent);
+            UploadQueueHandleService.addOnSubmittedHandler(function (result) {
+                self.options.onFilesSubmitted(result);
+            });
             UploadQueueHandleService.addOnUploadCompletedHandler(function (result) {
                 self.options.onFilesUploaded(result);
             });
@@ -50,18 +56,18 @@
 
         /////////////////////////////////////////////////////////////////////////
 
-        _studies_T:
+        _upload_queue_T:
             "<div class='tc-uploadingPanel' style='display: none'>" +
-                "<table class='tc-table-uploadingPanel'>" +
-                "<thead><tr>" +
-                "<th style='padding-left: 15px;'>Files</th>" +
-                "<th style='width: 100px; text-align: center'># of Files</th>" +
-                "<th style='width: 300px; text-align: center'>Upload Status</th>" +
-                "<th style='width: 50px; text-align: center'></th>" +
-                "</tr></thead>" +
-                "<tbody></tbody>" +
-                "</table>" +
-                "</div>",
+            "<table class='tc-table-uploadingPanel'>" +
+            "<thead><tr>" +
+            "<th style='padding-left: 15px;'>Files</th>" +
+            "<th style='width: 100px; text-align: center'># of Files</th>" +
+            "<th style='width: 300px; text-align: center'>Upload Status</th>" +
+            "<th style='width: 50px; text-align: center'></th>" +
+            "</tr></thead>" +
+            "<tbody></tbody>" +
+            "</table>" +
+            "</div>",
 
         /////////////////////////////////////////////////////////////////////////
 
@@ -87,7 +93,7 @@
         /////////////////////////////////////////////////////////////////////////
 
         getProcessingStatus: function () {
-            return UploadQueueHandleService.getProcessingStaus();
+            return UploadQueueHandleService.getProcessingStatus();
         }
     });
 })(jQuery, window, document);

@@ -27,6 +27,7 @@ var UploadQueueHandleService = (function () {
     var container;
     var isUploadInProgress = null;
     var onUploadCompleted = [];
+    var onSubmitted = [];
     var onQueueEmptied = [];
     var webService = null;
     var onErrorEvent;
@@ -38,6 +39,7 @@ var UploadQueueHandleService = (function () {
             isUploadInProgress = false;
             uploadItems = [];
             onUploadCompleted = [];
+            onSubmitted = [];
             container = _container;
             webService = _webService;
             onErrorEvent = _onErrorEvent;
@@ -67,13 +69,16 @@ var UploadQueueHandleService = (function () {
 
             if (!isUploadInProgress) triggerUpload();
         },
+        addOnSubmittedHandler: function (onSubmittedFunc) {
+            onSubmitted.push(onSubmittedFunc);
+        },
         addOnUploadCompletedHandler: function (onUploadCompletedFunc) {
             onUploadCompleted.push(onUploadCompletedFunc);
         },
         addOnQueueEmptiedHandler: function (onQueueEmptiedFunc) {
             onQueueEmptied.push(onQueueEmptiedFunc);
         },
-        getProcessingStaus: function () {
+        getProcessingStatus: function () {
             if (isUploadInProgress === null || webService === null)
                 throw new "Error. UploadQueueService was not initialized before using. Please call method init to initialize the service.";
             return isUploadInProgress;
@@ -94,14 +99,15 @@ var UploadQueueHandleService = (function () {
 
         $.when(data.processing)
             .done(function (result) {
-                onUploadCompleted.forEach(function (func) { func(result); });
+                onSubmitted.forEach(function (func) { func(result); });
             })
             .fail(function () {
                 uploadItem.status = Statuses.Failed;
             });
 
         $.when(data.uploading)
-            .done(function () {
+            .done(function (result) {
+                onUploadCompleted.forEach(function (func) { func(result); });
                 uploadItem.status = Statuses.Completed;
             })
             .fail(function () {
