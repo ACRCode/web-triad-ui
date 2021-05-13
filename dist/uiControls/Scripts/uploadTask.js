@@ -150,7 +150,6 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
         for (let i = 0; i < self._files.length; i++) {
             var item = {
                 name: self._files[i].name,
-                type: self._files[i].type,
                 size: self._files[i].size
             }
             filesAttributes.push(item);
