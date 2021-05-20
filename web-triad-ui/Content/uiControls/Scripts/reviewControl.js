@@ -23,16 +23,65 @@
                 isImagesRemovingAllowed: false
             },
 
+            _uploadedFilesGrid: null,
+            _packagesGrid: null,
+
+            _currentReceivingPackagesSessionId: null,
+            _updatePackagesTimer: null,
+            _canUpdatePackages: true,
+
+            _currentReceivingStudiesSessionId: null,
+            _updateStudiesTimer: null,
+            _canUpdateStudies: true,
+
             _service: null,
 
             _create: function () {
-                this.update(this.options);
+                this._uploadedFilesGrid = $("<div id='uploadedFilesGrid'></div>");
+                this._packagesGrid = $("<div id='packagesGrid'></div>");
+                this._packagesGrid.html($(this._spinner_T));
+                this._uploadedFilesGrid.html($(this._spinner_T));
+                this.element.append(this._packagesGrid);
+                this.element.append(this._uploadedFilesGrid);
+                this._service = new WebTriadService(this.options.serviceParam);
+                this._setReceivingPackages();
+                this._setReceivingStudies();
             },
 
             /////////////////////////////////////////////////////////////////////////
 
             _destroy: function () {
+                clearTimeout(this._updateStudiesTimer);
+                clearTimeout(this._updatePackagesTimer);
+                this._currentReceivingPackagesSessionId = null;
+                this._currentReceivingStudiesSessionId = null;
                 this.element.html("");
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _getPackagesDetailsDef: function () {
+                let self = this;
+                var deferred = $.Deferred();
+                /////////
+                /////////
+                /////////
+                var token = self.options.getSecurityToken();
+                self._setSecurityToken(token);
+
+                self._service.getPackagesDetails(self.options.reviewData, callback);
+
+                function callback(data) {
+                    if (data.processStatus === ProcessStatus.Error) {
+                        self.options.onErrorEvent(self._errorMessage(data));
+                        console.log(data.message);
+                        return;
+                    }
+                    data = data.data;
+                    deferred.resolve(data);
+                }
+
+                return deferred.promise();
             },
 
             /////////////////////////////////////////////////////////////////////////
@@ -44,7 +93,7 @@
                 /////////
                 /////////
                 var token = self.options.getSecurityToken();
-                self.setSecurityToken(token);
+                self._setSecurityToken(token);
 
                 self._service.getStudiesDetails(self.options.reviewData, callback);
 
@@ -79,7 +128,7 @@
                 /////////
                 /////////
                 var token = self.options.getSecurityToken();
-                self.setSecurityToken(token);
+                self._setSecurityToken(token);
 
                 self._service.getNonDicomsDetails(self.options.reviewData, callback);
 
@@ -103,11 +152,40 @@
 
             /////////////////////////////////////////////////////////////////////////
 
-            _bindEvent: function () {
+            _bindPackagesEvent: function () {
+                var self = this;
+                ///////////////////////////////////////
+                self._packagesGrid.find(".tc-hide-package").each(function () {
+                    var that = $(this);
+                    that.click(function () {
+                        self._canUpdatePackages = false;
+                        var hideUrl = that.attr("data-delete-link");
+                        var token = self.options.getSecurityToken();
+                        self._setSecurityToken(token);
+                        that.addClass("tc-loader");
+                        self._service.hidePackage(hideUrl, callback);
+                        function callback(data) {
+                            if (data.processStatus === ProcessStatus.Error) {
+                                self.options.onErrorEvent(self._errorMessage(data));
+                                that.removeClass("tc-loader");
+                                console.log(data.message);
+                            } else {
+                                self._setReceivingPackages();
+                            }
+                            self._canUpdatePackages = true;
+                        }
+                    });
+                });
+            },
+
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _bindStudiesEvent: function () {
                 var self = this;
                 ///////////////////////////////////////
 
-                self.element.find(".tc-collapse").each(function () {
+                self._uploadedFilesGrid.find(".tc-collapse").each(function () {
                     var that = $(this);
                     that.click(function () {
                         that.toggleClass("tc-expanded");
@@ -120,7 +198,7 @@
 
                 ///////////////////////////////////////
 
-                self.element.find(".tc-open-image").each(function () {
+                self._uploadedFilesGrid.find(".tc-open-image").each(function () {
                     var that = $(this);
                     that.click(function () {
 
@@ -136,7 +214,7 @@
                         /////////
                         /////////
                         var token = self.options.getSecurityToken();
-                        self.setSecurityToken(token);
+                        self._setSecurityToken(token);
 
                         self._service.openViewer(params, callback);
 
@@ -152,10 +230,10 @@
 
                 ///////////////////////////////////////
 
-                self.element.find(".tc-delete-study").each(function () {
+                self._uploadedFilesGrid.find(".tc-delete-study").each(function () {
                     var that = $(this);
                     that.click(function () {
-
+                        self._canUpdateStudies = false;
                         var study_E = $(self._confirm_delete_studies_T);
 
                         study_E.dialog({
@@ -168,7 +246,7 @@
                                 "Yes": function () {
                                     var deleteUrl = that.attr("data-delete-link");
                                     var token = self.options.getSecurityToken();
-                                    self.setSecurityToken(token);
+                                    self._setSecurityToken(token);
                                     that.addClass("tc-loader");
                                     self._service.deleteStudy(deleteUrl, callback);
 
@@ -177,15 +255,16 @@
                                             self.options.onErrorEvent(self._errorMessage(data));
                                             that.removeClass("tc-loader");
                                             console.log(data.message);
-                                            return;
                                         } else {
-                                            self.update();
+                                            self._setReceivingStudies();
                                         }
+                                        self._canUpdateStudies = true;
                                     }
 
                                     $(this).dialog("destroy");
                                 },
                                 "No": function () {
+                                    self._canUpdateStudies = true;
                                     $(this).dialog("destroy");
                                 }
                             }
@@ -195,9 +274,10 @@
 
                 ///////////////////////////////////////
 
-                self.element.find(".tc-delete-series").each(function () {
+                self._uploadedFilesGrid.find(".tc-delete-series").each(function () {
                     var that = $(this);
                     that.click(function () {
+                        self._canUpdateStudies = false;
                         var series_E = $(self._confirm_delete_series_T);
                         series_E.dialog({
                             dialogClass: "no-close",
@@ -209,7 +289,7 @@
                                 "Yes": function () {
                                     var deleteUrl = that.attr("data-delete-link");
                                     var token = self.options.getSecurityToken();
-                                    self.setSecurityToken(token);
+                                    self._setSecurityToken(token);
                                     that.addClass("tc-loader");
                                     self._service.deleteSeries(deleteUrl, callback);
 
@@ -218,15 +298,16 @@
                                             self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
                                             that.removeClass("tc-loader");
-                                            return;
                                         } else {
-                                            self.update();
+                                            self._setReceivingStudies();
                                         }
+                                        self._canUpdateStudies = true;
                                     }
 
                                     $(this).dialog("destroy");
                                 },
                                 "No": function () {
+                                    self._canUpdateStudies = true;
                                     $(this).dialog("destroy");
                                 }
                             }
@@ -234,9 +315,10 @@
                     });
                 });
 
-                self.element.find(".tc-delete-non-dicom").each(function () {
+                self._uploadedFilesGrid.find(".tc-delete-non-dicom").each(function () {
                     var that = $(this);
                     that.click(function () {
+                        self._canUpdateStudies = false;
                         let dialog = $(self._confirm_delete_non_dicom_T);
                         dialog.dialog({
                             dialogClass: "no-close",
@@ -248,7 +330,7 @@
                                 "Yes": function () {
                                     var deleteUrl = that.attr("data-delete-link");
                                     var token = self.options.getSecurityToken();
-                                    self.setSecurityToken(token);
+                                    self._setSecurityToken(token);
                                     that.addClass("tc-loader");
                                     self._service.deleteNonDicom(deleteUrl, callback);
 
@@ -257,15 +339,16 @@
                                             self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
                                             that.removeClass("tc-loader");
-                                            return;
                                         } else {
-                                            self.update();
+                                            self._setReceivingStudies();
                                         }
+                                        self._canUpdateStudies = true;
                                     }
 
                                     $(this).dialog("destroy");
                                 },
                                 "No": function () {
+                                    self._canUpdateStudies = true;
                                     $(this).dialog("destroy");
                                 }
                             }
@@ -273,9 +356,10 @@
                     });
                 });
 
-                self.element.find(".tc-delete-non-dicoms").each(function () {
+                self._uploadedFilesGrid.find(".tc-delete-non-dicoms").each(function () {
                     var that = $(this);
                     that.click(function () {
+                        self._canUpdateStudies = false;
                         let dialog = $(self._confirm_delete_non_dicoms_T);
                         dialog.dialog({
                             dialogClass: "no-close",
@@ -287,7 +371,7 @@
                                 "Yes": function () {
                                     var deleteIds = that.attr("data-delete-links").split(" ");
                                     var token = self.options.getSecurityToken();
-                                    self.setSecurityToken(token);
+                                    self._setSecurityToken(token);
                                     that.addClass("tc-loader");
                                     self._service.deleteNonDicoms(deleteIds, callback);
 
@@ -296,15 +380,16 @@
                                             self.options.onErrorEvent(self._errorMessage(data));
                                             console.log(data.message);
                                             that.removeClass("tc-loader");
-                                            return;
                                         } else {
-                                            self.update();
+                                            self._setReceivingStudies();
                                         }
+                                        self._canUpdateStudies = true;
                                     }
 
                                     $(this).dialog("destroy");
                                 },
                                 "No": function () {
+                                    self._canUpdateStudies = true;
                                     $(this).dialog("destroy");
                                 }
                             }
@@ -314,21 +399,6 @@
             },
 
             /////////////////////////////////////////////////////////////////////////
-
-            _arrayOfNameValueToDictionary: function (data) {
-                var result = {};
-                for (let i = 0; i < data.length; i++) {
-                    result[data[i].Name] = data[i].Value;
-                }
-                return result;
-            },
-
-            /////////////////////////////////////////////////////////////////////////
-
-            _spinner_T:
-                "<div class='tc-spinner'>" +
-                "<div class='tc-loader'></div>" +
-                "</div>",
 
             _studies_T:
                 "<div class='tc-wrapper'>" +
@@ -341,7 +411,7 @@
                 "<th style='width: 120px; text-align: center'>Submitted Date</th>" +
                 "<th style='width: 150px; text-align: center'>Study Size</th>" +
                 "<th id='studyImageViewColumnHeader' style='width: 100px; text-align: center'>Image</th>" +
-                "<th id='studyRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
+                "<th width='6%' id='studyRemoveColumnHeader' style='text-align: center' class='tc-action-th'>Action</th>" +
                 "</tr></thead>" +
                 "<tbody></tbody>" +
                 "</table>" +
@@ -355,7 +425,7 @@
                 "<th></th>" +
                 "<th></th>" +
                 "<th style='width: 200px;'></th>" +
-                "<th id='fileRemoveColumnHeader' style='width: 100px; text-align: center' class='tc-action-th'>Action</th>" +
+                "<th width='6%' id='fileRemoveColumnHeader' style='text-align: center' class='tc-action-th'>Action</th>" +
                 "</tr></thead>" +
                 "<tbody>" +
                 "</tbody>" +
@@ -372,7 +442,7 @@
                 "<th style='width: 200px; text-align: center'>File Type</th>" +
                 "<th style='width: 120px; text-align: center'>Submitted Date</th>" +
                 "<th style='width: 150px; text-align: center'>Size</th>" +
-                "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
+                "<th width='6%' style='text-align: center' class='tc-action-th'></th>" +
                 "</tr></thead>" +
                 "<tbody></tbody>" +
                 "</table>" +
@@ -390,12 +460,26 @@
                 "<th style='width: 120px; text-align: center'>Series Date</th>" +
                 "<th style='width: 120px; text-align: center'>Submitted Date</th>" +
                 "<th style='width: 150px; text-align: center'>No. of Files</th>" +
-                "<th style='width: 100px; text-align: center' class='tc-action-th'></th>" +
+                "<th width='6%' style='text-align: center' class='tc-action-th'></th>" +
                 "</tr></thead>" +
                 "<tbody></tbody>" +
                 "</table>" +
                 "</div>" +
                 "</td></tr>",
+
+            _packages_T:
+                "<div class='tc-packagesPanel' >" +
+                "<table class='tc-table-packagesPanel'>" +
+                "<thead><tr>" +
+                "<th style='padding-left: 15px;' width='55%'>Files</th>" +
+                "<th style='text-align: center' width='6%'># of Files</th>" +
+                "<th style='text-align: center' width='13%'>Upload Date</th>" +
+                "<th style='text-align: center' width='20%'>Status</th>" +
+                "<th style='text-align: center' width='6%'></th>" +
+                "</tr></thead>" +
+                "<tbody></tbody>" +
+                "</table>" +
+                "</div>",
 
             _confirm_delete_studies_T:
                 "<div id='dialog-confirm' style='display: none;'>" +
@@ -417,6 +501,8 @@
                 "<p>All the non-DICOM files will be deleted from the system. Please confirm.</p>" +
                 "</div>",
 
+            _spinner_T:
+                "<div style='display: block; margin: auto; min-height: 30px'><div class='tc-loader'></div></div>",
 
             _dictionaryStateOfCollapse: {},
 
@@ -445,13 +531,75 @@
 
             /////////////////////////////////////////////////////////////////////////
 
-            update: function (options) {
+            _updatePackages: function(id) {
                 let self = this;
 
-                let deleteDicomDisabledMessage = "Processing study data. 'Delete' will be enabled after processing is complete.";
-                let deleteNonDicomDisabledMessage = "Processing data. 'Delete' will be enabled after processing is complete.";
+                var packages_E = $(self._packages_T);
 
-                $.extend(self.options, options);
+                var deferredGetPackages =
+                    $.when(self._getPackagesDetailsDef()).then(function(data) {
+                        if (data.length === 0) {
+                            return $.Deferred().resolve(null).promise();
+                        }
+                        var tbody = packages_E.find("tbody");
+
+                        for (let i = 0; i < data.length; i++) {
+
+                            let isHideLink = data[i]._links.hide == null ? false : true;
+                            tbody.append(
+                                "<tr data-fileset-uid='" +
+                                data[i].Id +
+                                "'>" +
+                                "<td style='padding-left: 15px;'>" +
+                                "<div style='text-overflow: ellipsis;overflow: hidden;'>" +
+                                data[i].SummaryOfFiles +
+                                "</div>" +
+                                "</td>" +
+                                "<td style='text-align: center;'>" +
+                                data[i].TotalFilesCount +
+                                "</td>" +
+                                "<td style='text-align: center;'>" +
+                                data[i].UploadTime +
+                                "</td>" +
+                                "<td class='tc-upload-status' style='text-align: center; white-space: nowrap;'><p>" +
+                                (data[i].Status !== SubmissionPackageStatus[SubmissionPackageStatus.Complete]
+                                    ? data[i].Status
+                                    : self._prepareRejectedAndCorruptedFilesNotification(data[i])) +
+                                "</p></td>" +
+                                (isHideLink
+                                    ? "<td style='text-align: center;' title='Remove'><span class='tc-hide-package' data-delete-link ='" +
+                                    data[i]._links.hide.href +
+                                    "'></span></td>"
+                                    : "<td></td>"
+                                ) +
+                                "</tr>"
+                            );
+                        }
+                        return $.Deferred().resolve(packages_E).promise();
+                    });
+
+                return $.when(deferredGetPackages).done(function(packagesData) {
+                    if (!self._canUpdatePackages ||
+                    (self._currentReceivingPackagesSessionId != null &&
+                        self._currentReceivingPackagesSessionId !== id)) {
+                        return;
+                    }
+                    if (packagesData == null) {
+                        self._packagesGrid.html("");
+                    } else {
+                        self._packagesGrid.html(packagesData);
+                        self._bindPackagesEvent();
+                    }
+                });
+            },
+
+            _updateStudies: function (id) {
+                let self = this;
+
+                let deleteDicomDisabledMessage =
+                    "Processing study data. 'Delete' will be enabled after processing is complete.";
+                let deleteNonDicomDisabledMessage =
+                    "Processing data. 'Delete' will be enabled after processing is complete.";
 
                 var studies_E = $(self._studies_T);
                 var non_dicoms_E = $(self._non_dicoms_T);
@@ -464,8 +612,6 @@
                     studies_E.find("#studyRemoveColumnHeader").remove();
                     non_dicoms_E.find("#fileRemoveColumnHeader").remove();
                 }
-
-                self._service = new WebTriadService(self.options.serviceParam);
 
                 var deferredGetStudies;
 
@@ -523,7 +669,9 @@
                                             data[i]._links.delete.href +
                                             "'></span></td>"
                                             : "<td style='text-align: center;' " +
-                                            'title = "' + deleteDicomDisabledMessage + '">' +
+                                            'title = "' +
+                                            deleteDicomDisabledMessage +
+                                            '">' +
                                             "<span class='tc-delete-study tc-not-allowed'></span></td>"
                                         )
                                         : "") +
@@ -571,7 +719,9 @@
                                                 data[i].Series[j]._links.delete.href +
                                                 "'></span></td>"
                                                 : "<td style='text-align: center;' " +
-                                                'title = "' + deleteDicomDisabledMessage + '">' +
+                                                'title = "' +
+                                                deleteDicomDisabledMessage +
+                                                '">' +
                                                 "<span class='tc-delete-series tc-not-allowed'>" +
                                                 "</span></td>"
                                             )
@@ -645,11 +795,13 @@
                                 "</td>" +
                                 ((self.options.isImagesRemovingAllowed)
                                     ? (canDeleteAllFiles
-                                        ? "<td style='text-align: center; width: 100px'><span class='tc-delete-non-dicoms' data-delete-links ='" +
+                                        ? "<td width='6%' style='text-align: center;'><span class='tc-delete-non-dicoms' data-delete-links ='" +
                                         deleteLinks +
                                         "'></span></td>"
-                                        : "<td style='text-align: center; width: 100px' " +
-                                        'title = "' + deleteNonDicomDisabledMessage + '">' +
+                                        : "<td width='6%' style='text-align: center;' " +
+                                        'title = "' +
+                                        deleteNonDicomDisabledMessage +
+                                        '">' +
                                         "<span class='tc-delete-non-dicoms tc-not-allowed'>" +
                                         "</span></td>"
                                     )
@@ -697,7 +849,9 @@
                                             data[i]._links.delete.href +
                                             "'></span></td>"
                                             : "<td style='text-align: center;' " +
-                                            'title = "' + deleteNonDicomDisabledMessage + '">' +
+                                            'title = "' +
+                                            deleteNonDicomDisabledMessage +
+                                            '">' +
                                             "<span class='tc-delete-non-dicom tc-not-allowed'>" +
                                             "</span></td>"
                                         )
@@ -710,30 +864,104 @@
                         });
                 }
 
-                $.when(deferredGetStudies, deferredGetNonDicoms).done(function (dicomData, nonDicomData) {
-                    if (dicomData == null && nonDicomData == null) {
-                        self.element.html("");
+                return $.when(deferredGetStudies, deferredGetNonDicoms).done(function (dicomData, nonDicomData) {
+                    if (!self._canUpdateStudies ||
+                        (self._currentReceivingStudiesSessionId != null && self._currentReceivingStudiesSessionId !== id)) {
                         return;
                     }
+
+                    if (dicomData == null && nonDicomData == null) {
+                        self._uploadedFilesGrid.html("");
+                        return;
+                    }
+
                     var isEmpty = true;
+
                     if (dicomData != null) {
-                        self.element.html(dicomData);
+                        self._uploadedFilesGrid.html(dicomData);
                         isEmpty = false;
                     }
                     if (nonDicomData != null) {
                         if (isEmpty) {
-                            self.element.html(nonDicomData);
+                            self._uploadedFilesGrid.html(nonDicomData);
                         } else {
-                            self.element.append(nonDicomData);
+                            self._uploadedFilesGrid.append(nonDicomData);
                         }
                     }
-                    self._bindEvent();
+                    self._bindStudiesEvent();
                 });
             },
 
             /////////////////////////////////////////////////////////////////////////
 
-            setSecurityToken: function (token) {
+            _prepareRejectedAndCorruptedFilesNotification: function (data) {
+                let totalRejectedFiles = data.DicomSummary.CorruptedCount +
+                    data.DicomSummary.RejectedCount +
+                    data.NonDicomsSummary.RejectedCount +
+                    data.DicomDirSummary.RejectedCount;
+                let totalIgnoredFiles = data.DicomSummary.DuplicateCount;
+                let statusString = data.TotalFilesCount -
+                    totalRejectedFiles -
+                    totalIgnoredFiles +
+                    " file(s) uploaded successfully. ";
+                if (totalRejectedFiles !== 0) statusString += totalRejectedFiles + " file(s) rejected to upload. ";
+                if (totalIgnoredFiles !== 0) statusString += totalIgnoredFiles + " duplicate file(s) were ignored.";
+                return statusString;
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _setReceivingPackages: function () {
+                let self = this;
+                this._currentReceivingPackagesSessionId = self._generateId();
+                clearTimeout(this._updatePackagesTimer);
+                let id = this._currentReceivingPackagesSessionId;
+                this._updatePackagesTimer = setTimeout(function request() {
+                    $.when(self._updatePackages(id)).always(function () {
+                        if (id === self._currentReceivingPackagesSessionId) {
+                            self._updatePackagesTimer = setTimeout(request, 5000);
+                        }
+                    });
+                },
+                    100);
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _setReceivingStudies: function () {
+                let self = this;
+                this._currentReceivingStudiesSessionId = self._generateId();
+                clearTimeout(this._updateStudiesTimer);
+                let id = this._currentReceivingStudiesSessionId;
+                this._updateStudiesTimer = setTimeout(function request() {
+                    $.when(self._updateStudies(id)).always(function () {
+                        if (id === self._currentReceivingStudiesSessionId) {
+                            self._updateStudiesTimer = setTimeout(request, 5000);
+                        }
+                    });
+                },
+                    100);
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _generateId: function () {
+                return '_' + Math.random().toString(36).substr(2, 9);
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _arrayOfNameValueToDictionary: function (data) {
+                var result = {};
+                for (let i = 0; i < data.length; i++) {
+                    result[data[i].Name] = data[i].Value;
+                }
+                return result;
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _setSecurityToken: function (token) {
                 if (token === null) return;
                 let self = this;
                 self.options.securityToken = token;

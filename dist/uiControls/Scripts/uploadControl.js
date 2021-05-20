@@ -15,9 +15,6 @@
             onFilesUploaded: function () {
                 console.log("On uploaded event handler was not added");
             },
-            onFilesSubmitted: function () {
-                console.log("On submitted event handler was not added");
-            },
             onErrorEvent: function () {
                 console.log("On error event handler was not added");
             },
@@ -39,9 +36,6 @@
 
             var parsingPanel = this.element.find(".tc-uploadingPanel");
             UploadQueueHandleService.init(self._service, parsingPanel.find("tbody"), self.options.onErrorEvent);
-            UploadQueueHandleService.addOnSubmittedHandler(function (result) {
-                self.options.onFilesSubmitted(result);
-            });
             UploadQueueHandleService.addOnUploadCompletedHandler(function (result) {
                 self.options.onFilesUploaded(result);
             });
@@ -60,10 +54,10 @@
             "<div class='tc-uploadingPanel' style='display: none'>" +
             "<table class='tc-table-uploadingPanel'>" +
             "<thead><tr>" +
-            "<th style='padding-left: 15px;'>Files</th>" +
-            "<th style='width: 100px; text-align: center'># of Files</th>" +
-            "<th style='width: 300px; text-align: center'>Upload Status</th>" +
-            "<th style='width: 50px; text-align: center'></th>" +
+            "<th style='padding-left: 15px;' width='55%'>Files</th>" +
+            "<th style='text-align: center' width='6%'># of Files</th>" +
+            "<th style='text-align: center' width='33%'>Upload Status</th>" +
+            "<th style='text-align: center' width='6%'></th>" +
             "</tr></thead>" +
             "<tbody></tbody>" +
             "</table>" +

@@ -27,7 +27,6 @@ var UploadQueueHandleService = (function () {
     var container;
     var isUploadInProgress = null;
     var onUploadCompleted = [];
-    var onSubmitted = [];
     var onQueueEmptied = [];
     var webService = null;
     var onErrorEvent;
@@ -39,7 +38,6 @@ var UploadQueueHandleService = (function () {
             isUploadInProgress = false;
             uploadItems = [];
             onUploadCompleted = [];
-            onSubmitted = [];
             container = _container;
             webService = _webService;
             onErrorEvent = _onErrorEvent;
@@ -59,6 +57,8 @@ var UploadQueueHandleService = (function () {
 
             var uploadRowElment = container.find("tr[data-fileset-uid='" + newUploadItem.id + "']");
             uploadRowElment.on("remove", function () {
+                let item = uploadItems.find(function (i) { return i.id === newUploadItem.id });
+                item.status = Statuses.Completed;
                 if (container.find("tr").length <= 1)
                     onQueueEmptied.forEach(function (func) { func(); });
             });
@@ -68,9 +68,6 @@ var UploadQueueHandleService = (function () {
             uploadTask.onRetryRequested = retryUpload;
 
             if (!isUploadInProgress) triggerUpload();
-        },
-        addOnSubmittedHandler: function (onSubmittedFunc) {
-            onSubmitted.push(onSubmittedFunc);
         },
         addOnUploadCompletedHandler: function (onUploadCompletedFunc) {
             onUploadCompleted.push(onUploadCompletedFunc);
@@ -96,14 +93,6 @@ var UploadQueueHandleService = (function () {
         }
 
         var data = uploadItem.task.execute();
-
-        $.when(data.processing)
-            .done(function (result) {
-                onSubmitted.forEach(function (func) { func(result); });
-            })
-            .fail(function () {
-                uploadItem.status = Statuses.Failed;
-            });
 
         $.when(data.uploading)
             .done(function (result) {

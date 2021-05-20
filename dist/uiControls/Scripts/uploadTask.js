@@ -39,11 +39,8 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
     this._cancelToken = null;
 
     this._data = {
-        processing: null,
         uploading: null
     };
-
-    this._rejectedAndCorruptedData = null;
 
     this.onRetryRequested = function (guidOfFilesSet) { console.log("Default on retry requested event handler: upload retry was requested for: " + guidOfFilesSet) };
 
@@ -52,7 +49,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
 
         var fileNames = self._getFileNames();
         return "<tr data-fileset-uid='" + self._guidOfFilesSet + "'>" +
-            "<td style='padding-left: 15px;'><div style='text-overflow: ellipsis;overflow: hidden;width: 300px;white-space: nowrap;'>" +
+            "<td style='padding-left: 15px;'><div style='text-overflow: ellipsis;overflow: hidden;'>" +
             fileNames +
             "</div></td>" +
             "<td style='text-align: center;'>" + self._files.length + "</td>" +
@@ -83,12 +80,8 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
     this.execute = function () {
         let self = this;
 
-        self._data.processing = $.Deferred();
         self._data.uploading = $.Deferred();
-
         self._uploadFilesToServer();
-
-        self._data.processing.promise();
         self._data.uploading.promise();
 
         return self._data;
@@ -110,8 +103,6 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
 
         self._isCanceled = true;
         self._isUploadInProgress = false;
-        self._rejectedAndCorruptedData = null;
-        self._data.processing.reject();
         self._data.uploading.reject();
 
         self._webService.cancelUploadAndSubmitListOfFiles(self._cancelToken,
@@ -125,7 +116,6 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
     }
 
     this._retry = function (self) {
-        self._rejectedAndCorruptedData = null;
         self._isCanceled = false;
         self._uploadStatusComponent.showStatus(waitingStatusText);
         self.onRetryRequested(self._guidOfFilesSet);
@@ -134,7 +124,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
     this._getFileNames = function () {
         let self = this;
 
-        var count = self._files.length > 4 ? 3 : self._files.length;
+        var count = self._files.length > 11 ? 10 : self._files.length;
         var filesNames = self._files[0].name;
         for (let i = 1; i < count; i++) {
             filesNames += ", " + self._files[i].name;
@@ -164,28 +154,12 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
         switch (result.processStatus) {
             case ProcessStatus.Success:
                 switch (result.processStep) {
-                    case ProcessStep.Processing:
-                        var totalRejectedFiles = result.rejectedAndCorruptedData.NumberOfCorruptedDicoms +
-                            result.rejectedAndCorruptedData.NumberOfRejectedDicoms +
-                            result.rejectedAndCorruptedData.NumberOfRejectedNonDicoms +
-                            result.rejectedAndCorruptedData.NumberOfRejectedDicomDir;
-                        var totalIgnoredFiles = result.rejectedAndCorruptedData.NumberOfDuplicateDicoms;
-                        var statusString = self._files.length - totalRejectedFiles - totalIgnoredFiles
-                            + " file(s) uploaded successfully. ";
-                        if (totalRejectedFiles != 0) statusString += totalRejectedFiles + " file(s) rejected to upload. ";
-                        if (totalIgnoredFiles != 0) statusString += totalIgnoredFiles + " duplicate file(s) were ignored. ";
-                        self._uploadStatusComponent.showStatus(statusString);
-                        self._rejectedAndCorruptedData = result.rejectedAndCorruptedData;
-                        defer.processing.resolve(self._rejectedAndCorruptedData);
-                        self._showRemoveOrCancelButton();
-                        break;
                     case ProcessStep.Uploading:
                         self._uploadStatusComponent.updateProgressBar(result.progress);
                         self._isUploadInProgress = false;
                         defer.uploading.resolve(self._getFileAttributes());
                         break;
                     case ProcessStep.Canceling:
-                        defer.processing.reject();
                         defer.uploading.reject();
                         break;
                 }
@@ -201,7 +175,6 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
             case ProcessStatus.Error:
                 self._isUploadInProgress = false;
                 self._uploadStatusComponent.showStatusWithRetryButton("Failed", function () { self._retry(self); });
-                defer.processing.reject();
                 defer.uploading.reject();
 
                 self._onErrorEvent(self._errorMessage(result));
