@@ -75,6 +75,7 @@
                     if (data.processStatus === ProcessStatus.Error) {
                         self.options.onErrorEvent(self._errorMessage(data));
                         console.log(data.message);
+                        deferred.resolve(null);
                         return;
                     }
                     data = data.data;
@@ -101,6 +102,7 @@
                     if (data.processStatus === ProcessStatus.Error) {
                         self.options.onErrorEvent(self._errorMessage(data));
                         console.log(data.message);
+                        deferred.resolve(null);
                         return;
                     }
                     data = data.data;
@@ -136,6 +138,7 @@
                     if (data.processStatus === ProcessStatus.Error) {
                         self.options.onErrorEvent(self._errorMessage(data));
                         console.log(data.message);
+                        deferred.resolve(null);
                         return;
                     }
                     data = data.data;
@@ -531,14 +534,14 @@
 
             /////////////////////////////////////////////////////////////////////////
 
-            _updatePackages: function(id) {
+            _updatePackages: function (id) {
                 let self = this;
 
                 var packages_E = $(self._packages_T);
 
                 var deferredGetPackages =
-                    $.when(self._getPackagesDetailsDef()).then(function(data) {
-                        if (data.length === 0) {
+                    $.when(self._getPackagesDetailsDef()).then(function (data) {
+                        if (data == null || data.length === 0) {
                             return $.Deferred().resolve(null).promise();
                         }
                         var tbody = packages_E.find("tbody");
@@ -578,14 +581,14 @@
                         return $.Deferred().resolve(packages_E).promise();
                     });
 
-                return $.when(deferredGetPackages).done(function(packagesData) {
+                return $.when(deferredGetPackages).done(function (packagesData) {
                     if (!self._canUpdatePackages ||
-                    (self._currentReceivingPackagesSessionId != null &&
-                        self._currentReceivingPackagesSessionId !== id)) {
+                        (self._currentReceivingPackagesSessionId != null &&
+                            self._currentReceivingPackagesSessionId !== id)) {
                         return;
                     }
                     if (packagesData == null) {
-                        self._packagesGrid.html("");
+                        self._packagesGrid.html($(self._spinner_T));
                     } else {
                         self._packagesGrid.html(packagesData);
                         self._bindPackagesEvent();
@@ -621,7 +624,7 @@
                     deferredGetStudies =
                         $.when(self._getStudiesDetailsDef()).then(function (data) {
 
-                            if (data.length === 0) {
+                            if (data == null || data.length === 0) {
                                 return $.Deferred().resolve(null).promise();
                             }
 
@@ -743,7 +746,7 @@
                     deferredGetNonDicoms =
                         $.when(self._getNonDicomsDetailsDef()).then(function (data) {
 
-                            if (data.length === 0) {
+                            if (data == null || data.length === 0) {
                                 return $.Deferred().resolve(null).promise();
                             }
 
@@ -871,7 +874,7 @@
                     }
 
                     if (dicomData == null && nonDicomData == null) {
-                        self._uploadedFilesGrid.html("");
+                        self._uploadedFilesGrid.html($(self._spinner_T));
                         return;
                     }
 
@@ -936,7 +939,7 @@
                 this._updateStudiesTimer = setTimeout(function request() {
                     $.when(self._updateStudies(id)).always(function () {
                         if (id === self._currentReceivingStudiesSessionId) {
-                            self._updateStudiesTimer = setTimeout(request, 5000);
+                            self._updateStudiesTimer = setTimeout(request, 10000);
                         }
                     });
                 },
