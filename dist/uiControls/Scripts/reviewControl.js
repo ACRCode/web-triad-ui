@@ -588,7 +588,7 @@
                         return;
                     }
                     if (packagesData == null) {
-                        self._packagesGrid.html($(self._spinner_T));
+                        self._packagesGrid.html("");
                     } else {
                         self._packagesGrid.html(packagesData);
                         self._bindPackagesEvent();
@@ -874,7 +874,7 @@
                     }
 
                     if (dicomData == null && nonDicomData == null) {
-                        self._uploadedFilesGrid.html($(self._spinner_T));
+                        self._uploadedFilesGrid.html("");
                         return;
                     }
 
