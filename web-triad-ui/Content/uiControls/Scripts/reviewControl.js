@@ -406,7 +406,7 @@
             _studies_T:
                 "<div class='tc-wrapper'>" +
                 "<table class='tc-table-study'>" +
-                "<caption>Uploaded DICOM Files</caption>" +
+                "<caption>Uploaded and Processed DICOM Files</caption>" +
                 "<thead><tr>" +
                 "<th></th>" +
                 "<th>Study Description</th>" +
@@ -423,7 +423,7 @@
             _non_dicoms_T:
                 "<div class='tc-wrapper'>" +
                 "<table class='tc-table-study'>" +
-                "<caption>Uploaded Non-DICOM Files</caption>" +
+                "<caption>Uploaded and Processed Non-DICOM Files</caption>" +
                 "<thead style='display: none'><tr>" +
                 "<th></th>" +
                 "<th></th>" +
@@ -477,7 +477,7 @@
                 "<th style='padding-left: 15px;' width='55%'>Files</th>" +
                 "<th style='text-align: center' width='6%'># of Files</th>" +
                 "<th style='text-align: center' width='13%'>Upload Date</th>" +
-                "<th style='text-align: center' width='20%'>Status</th>" +
+                "<th style='text-align: center' width='20%'>Process Status</th>" +
                 "<th style='text-align: center' width='6%'></th>" +
                 "</tr></thead>" +
                 "<tbody></tbody>" +
