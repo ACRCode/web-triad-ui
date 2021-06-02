@@ -95,14 +95,15 @@ var UploadQueueHandleService = (function () {
         var data = uploadItem.task.execute();
 
         $.when(data.uploading)
-            .done(function (result) {
-                onUploadCompleted.forEach(function (func) { func(result); });
+            .done(function(result) {
                 uploadItem.status = Statuses.Completed;
+                let isUploadQueueEmpty = pullUploadItemFromQueue() == null ? true : false;
+                onUploadCompleted.forEach(function(func) { func({ files: result, isUploadQueueEmpty }); });
             })
-            .fail(function () {
+            .fail(function() {
                 uploadItem.status = Statuses.Failed;
             })
-            .always(function () {
+            .always(function() {
                 triggerUpload();
             });
     }
