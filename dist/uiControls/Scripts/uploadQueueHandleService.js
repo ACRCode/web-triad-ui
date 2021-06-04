@@ -55,15 +55,15 @@ var UploadQueueHandleService = (function () {
 
             container.append(uploadTask.getHtml());
 
-            var uploadRowElment = container.find("tr[data-fileset-uid='" + newUploadItem.id + "']");
-            uploadRowElment.on("remove", function () {
+            var uploadRowElement = container.find("tr[data-fileset-uid='" + newUploadItem.id + "']");
+            uploadRowElement.on("remove", function () {
                 let item = uploadItems.find(function (i) { return i.id === newUploadItem.id });
                 item.status = Statuses.Completed;
                 if (container.find("tr").length <= 1)
                     onQueueEmptied.forEach(function (func) { func(); });
             });
 
-            uploadTask.bindEvents(uploadRowElment);
+            uploadTask.bindEvents(uploadRowElement);
 
             uploadTask.onRetryRequested = retryUpload;
 
@@ -98,7 +98,9 @@ var UploadQueueHandleService = (function () {
             .done(function(result) {
                 uploadItem.status = Statuses.Completed;
                 let isUploadQueueEmpty = pullUploadItemFromQueue() == null ? true : false;
-                onUploadCompleted.forEach(function(func) { func({ files: result, isUploadQueueEmpty }); });
+                onUploadCompleted.forEach(function (func) { func({ files: result, isUploadQueueEmpty }); });
+                let uploadRowElement = container.find("tr[data-fileset-uid='" + uploadItem.id + "']");
+                uploadRowElement.remove();
             })
             .fail(function() {
                 uploadItem.status = Statuses.Failed;

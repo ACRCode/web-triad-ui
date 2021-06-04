@@ -166,8 +166,6 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
                 break;
             case ProcessStatus.InProgress:
                 if (result.processStep == ProcessStep.Processing) {
-                    var statusString = self._files.length + " file(s) successfully uploaded to server. ";
-                    self._uploadStatusComponent.showStatus(statusString);
                     break;
                 }
                 self._uploadStatusComponent.updateProgressBar(result.progress);
