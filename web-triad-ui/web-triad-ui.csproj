@@ -19,6 +19,8 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <Use64BitIISExpress />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -89,6 +91,7 @@
     <Content Include="Content\uiControls\Images\minus.png" />
     <Content Include="Content\uiControls\Images\plus.png" />
     <Content Include="Content\uiControls\Images\retry.png" />
+    <Content Include="Content\uiControls\Images\stop-sign.png" />
     <Content Include="Content\uiControls\Images\upload-btn.png" />
     <Content Include="Content\uiControls\Images\upload.png" />
     <Content Include="Content\uiControls\Scripts\reviewControl.js" />
@@ -119,14 +122,6 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Default\ReviewControl.cshtml" />
     <Content Include="Views\Default\UploadControl.cshtml" />
-    <Content Include="Content\uiControls\Fonts\MyriadProRegular\MyriadProRegular.eot" />
-    <Content Include="Content\uiControls\Fonts\MyriadProRegular\MyriadProRegular.otf" />
-    <Content Include="Content\uiControls\Fonts\MyriadProRegular\MyriadProRegular.ttf" />
-    <Content Include="Content\uiControls\Fonts\MyriadProRegular\MyriadProRegular.woff" />
-    <Content Include="Content\uiControls\Fonts\MyriadProSemiBold\MyriadProSemiBold.eot" />
-    <Content Include="Content\uiControls\Fonts\MyriadProSemiBold\MyriadProSemiBold.otf" />
-    <Content Include="Content\uiControls\Fonts\MyriadProSemiBold\MyriadProSemiBold.ttf" />
-    <Content Include="Content\uiControls\Fonts\MyriadProSemiBold\MyriadProSemiBold.woff" />
     <Content Include="bower.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

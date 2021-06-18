@@ -38,7 +38,7 @@
 
             _create: function () {
                 this._uploadedFilesGrid = $("<div id='uploadedFilesGrid'></div>");
-                this._packagesGrid = $("<div id='packagesGrid'></div>");
+                this._packagesGrid = $("<div id='packagesGrid' style='margin-bottom: -2px;'></div>");
                 this._packagesGrid.html($(this._spinner_T));
                 this._uploadedFilesGrid.html($(this._spinner_T));
                 this.element.append(this._packagesGrid);
@@ -405,8 +405,11 @@
 
             _studies_T:
                 "<div class='tc-wrapper'>" +
+                "<div class='tc-packagesPanelLabel'>" +
+                "<span style='display: block; font-weight: bold; text-align: center;'>Processed DICOM Files</span>" +
+                "<span style='display: block; text-align: center;'>Uploaded and Processed DICOM Files.</span>" +
+                "</div>" +
                 "<table class='tc-table-study'>" +
-                "<caption>Uploaded and Processed DICOM Files</caption>" +
                 "<thead><tr>" +
                 "<th></th>" +
                 "<th>Study Description</th>" +
@@ -414,7 +417,7 @@
                 "<th style='width: 120px; text-align: center'>Submitted Date</th>" +
                 "<th style='width: 150px; text-align: center'>Study Size</th>" +
                 "<th id='studyImageViewColumnHeader' style='width: 100px; text-align: center'>Image</th>" +
-                "<th width='6%' id='studyRemoveColumnHeader' style='text-align: center' class='tc-action-th'>Action</th>" +
+                "<th width='8%' id='studyRemoveColumnHeader' style='text-align: center' class='tc-action-th'>Action</th>" +
                 "</tr></thead>" +
                 "<tbody></tbody>" +
                 "</table>" +
@@ -422,13 +425,16 @@
 
             _non_dicoms_T:
                 "<div class='tc-wrapper'>" +
+                "<div class='tc-packagesPanelLabel'>" +
+                "<span style='display: block; font-weight: bold; text-align: center;'>Processed Non-DICOM Files</span>" +
+                "<span style='display: block; text-align: center;'>Uploaded and Processed Non-DICOM Files.</span>" +
+                "</div>" +
                 "<table class='tc-table-study'>" +
-                "<caption>Uploaded and Processed Non-DICOM Files</caption>" +
                 "<thead style='display: none'><tr>" +
                 "<th></th>" +
                 "<th></th>" +
                 "<th style='width: 200px;'></th>" +
-                "<th width='6%' id='fileRemoveColumnHeader' style='text-align: center' class='tc-action-th'>Action</th>" +
+                "<th width='8%' id='fileRemoveColumnHeader' style='text-align: center' class='tc-action-th'>Action</th>" +
                 "</tr></thead>" +
                 "<tbody>" +
                 "</tbody>" +
@@ -445,7 +451,7 @@
                 "<th style='width: 200px; text-align: center'>File Type</th>" +
                 "<th style='width: 120px; text-align: center'>Submitted Date</th>" +
                 "<th style='width: 150px; text-align: center'>Size</th>" +
-                "<th width='6%' style='text-align: center' class='tc-action-th'></th>" +
+                "<th width='8%' style='text-align: center' class='tc-action-th'></th>" +
                 "</tr></thead>" +
                 "<tbody></tbody>" +
                 "</table>" +
@@ -463,7 +469,7 @@
                 "<th style='width: 120px; text-align: center'>Series Date</th>" +
                 "<th style='width: 120px; text-align: center'>Submitted Date</th>" +
                 "<th style='width: 150px; text-align: center'>No. of Files</th>" +
-                "<th width='6%' style='text-align: center' class='tc-action-th'></th>" +
+                "<th width='8%' style='text-align: center' class='tc-action-th'></th>" +
                 "</tr></thead>" +
                 "<tbody></tbody>" +
                 "</table>" +
@@ -472,10 +478,14 @@
 
             _packages_T:
                 "<div class='tc-packagesPanel' >" +
+                "<div class='tc-packagesPanelLabel'>" +
+                "<span style='display: block; font-weight: bold; text-align: center;'>Processing Report</span>" +
+                "<span style='display: block; text-align: center;'>DICOM files being processed.</span>" +
+                "</div>" +
                 "<table class='tc-table-packagesPanel'>" +
                 "<thead><tr>" +
                 "<th style='padding-left: 15px;' width='55%'>Files</th>" +
-                "<th style='text-align: center' width='6%'># of Files</th>" +
+                "<th style='text-align: center' width='6%'>#Files</th>" +
                 "<th style='text-align: center' width='13%'>Upload Date</th>" +
                 "<th style='text-align: center' width='20%'>Process Status</th>" +
                 "<th style='text-align: center' width='6%'></th>" +
@@ -566,7 +576,7 @@
                                 "</td>" +
                                 "<td class='tc-upload-status' style='text-align: center; white-space: nowrap;'><p>" +
                                 (data[i].Status !== SubmissionPackageStatus[SubmissionPackageStatus.Complete]
-                                    ? data[i].Status
+                                    ? self._getStatusString(data[i].Status)
                                     : self._prepareRejectedAndCorruptedFilesNotification(data[i])) +
                                 "</p></td>" +
                                 (isHideLink
@@ -670,12 +680,12 @@
                                         ? (isDeleteLink
                                             ? "<td style='text-align: center;'><span class='tc-delete-study' data-delete-link ='" +
                                             data[i]._links.delete.href +
-                                            "'></span></td>"
+                                            "'>Delete</span></td>"
                                             : "<td style='text-align: center;' " +
                                             'title = "' +
                                             deleteDicomDisabledMessage +
                                             '">' +
-                                            "<span class='tc-delete-study tc-not-allowed'></span></td>"
+                                            "<span class='tc-delete-study tc-not-allowed'>Delete</span></td>"
                                         )
                                         : "") +
                                     "</tr>"
@@ -720,12 +730,12 @@
                                             ? (isDeleteLink
                                                 ? "<td style='text-align: center;'><span class='tc-delete-series' data-delete-link ='" +
                                                 data[i].Series[j]._links.delete.href +
-                                                "'></span></td>"
+                                                "'>Delete</span></td>"
                                                 : "<td style='text-align: center;' " +
                                                 'title = "' +
                                                 deleteDicomDisabledMessage +
                                                 '">' +
-                                                "<span class='tc-delete-series tc-not-allowed'>" +
+                                                "<span class='tc-delete-series tc-not-allowed'>Delete" +
                                                 "</span></td>"
                                             )
                                             : "") +
@@ -798,14 +808,14 @@
                                 "</td>" +
                                 ((self.options.isImagesRemovingAllowed)
                                     ? (canDeleteAllFiles
-                                        ? "<td width='6%' style='text-align: center;'><span class='tc-delete-non-dicoms' data-delete-links ='" +
+                                        ? "<td width='8%' style='text-align: center;'><span class='tc-delete-non-dicoms' data-delete-links ='" +
                                         deleteLinks +
-                                        "'></span></td>"
-                                        : "<td width='6%' style='text-align: center;' " +
+                                        "'>Delete</span></td>"
+                                        : "<td width='8%' style='text-align: center;' " +
                                         'title = "' +
                                         deleteNonDicomDisabledMessage +
                                         '">' +
-                                        "<span class='tc-delete-non-dicoms tc-not-allowed'>" +
+                                        "<span class='tc-delete-non-dicoms tc-not-allowed'>Delete" +
                                         "</span></td>"
                                     )
                                     : "") +
@@ -850,12 +860,12 @@
                                         ? (isDeleteLink
                                             ? "<td style='text-align: center;'><span class='tc-delete-non-dicom' data-delete-link ='" +
                                             data[i]._links.delete.href +
-                                            "'></span></td>"
+                                            "'>Delete</span></td>"
                                             : "<td style='text-align: center;' " +
                                             'title = "' +
                                             deleteNonDicomDisabledMessage +
                                             '">' +
-                                            "<span class='tc-delete-non-dicom tc-not-allowed'>" +
+                                            "<span class='tc-delete-non-dicom tc-not-allowed'>Delete" +
                                             "</span></td>"
                                         )
                                         : "") +
@@ -944,6 +954,19 @@
                     });
                 },
                     100);
+            },
+
+            /////////////////////////////////////////////////////////////////////////
+
+            _getStatusString: function (status) {
+                switch (status) {
+                    case SubmissionPackageStatus[SubmissionPackageStatus.Submitting]:
+                        return "Processing...";
+                    case SubmissionPackageStatus[SubmissionPackageStatus.Failed]:
+                        return "Error";
+                    default:
+                        return status;
+                }
             },
 
             /////////////////////////////////////////////////////////////////////////

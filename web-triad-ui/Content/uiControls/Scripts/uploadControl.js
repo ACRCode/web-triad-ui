@@ -52,10 +52,15 @@
 
         _upload_queue_T:
             "<div class='tc-uploadingPanel' style='display: none'>" +
+            "<div class='tc-uploadingPanelLabel'>" +
+            "<span class='tc-stop-icon'></span>" +
+            "<span style='display: block; padding-top: 10px; font-weight: bold;'>Uploading Status...</span>" +
+            "<span>Please do not navigate away or close the page until all files have been uploaded successfully.</span>" +
+            "</div>" +
             "<table class='tc-table-uploadingPanel'>" +
             "<thead><tr>" +
             "<th style='padding-left: 15px;' width='55%'>Files</th>" +
-            "<th style='text-align: center' width='6%'># of Files</th>" +
+            "<th style='text-align: center' width='6%'>#Files</th>" +
             "<th style='text-align: center' width='33%'>Upload Status</th>" +
             "<th style='text-align: center' width='6%'></th>" +
             "</tr></thead>" +
