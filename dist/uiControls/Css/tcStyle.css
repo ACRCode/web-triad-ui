@@ -109,7 +109,7 @@
         text-align: left;
         color: #4a4a4a;
         font-size: 14px;
-        line-height: 2.5;
+        height: 35px;
     }
 
     .tc-table-study > tbody {
@@ -117,7 +117,7 @@
     }
 
         .tc-table-study > tbody > tr {
-            line-height: 3;
+            height: 35px;
             font-size: 14px;
         }
 
@@ -163,7 +163,7 @@
     }
 
         .tc-table-series > tbody > tr {
-            line-height: 2.6;
+            height: 35px;
             font-size: 14px;
         }
 
@@ -252,6 +252,11 @@ span.tc-hide-package {
     background-color: white;
 }
 
+    .tc-table-series > tbody > tr > td {
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+
 .tc-stop-icon {
     float: left;
     margin: 12px;
@@ -293,7 +298,6 @@ span.tc-hide-package {
     width: 100%;
     border-collapse: collapse;
 }
-
 
     .tc-table-uploadingPanel > thead {
         border-bottom: 1.5px solid #d8d8d8;
