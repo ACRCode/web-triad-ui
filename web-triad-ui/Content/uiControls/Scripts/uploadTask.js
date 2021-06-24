@@ -82,7 +82,6 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
 
         self._data.uploading = $.Deferred();
         self._uploadFilesToServer();
-        self._data.uploading.promise();
 
         return self._data;
     }
@@ -157,7 +156,7 @@ function UploadTask(files, guidOfFilesSet, uploadParameters, webService, onError
                     case ProcessStep.Uploading:
                         self._uploadStatusComponent.updateProgressBar(result.progress);
                         self._isUploadInProgress = false;
-                        defer.uploading.resolve(self._getFileAttributes());
+                        setTimeout(() => defer.uploading.resolve(self._getFileAttributes()), 300);
                         break;
                     case ProcessStep.Canceling:
                         defer.uploading.reject();
