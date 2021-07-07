@@ -635,6 +635,7 @@
                         $.when(self._getStudiesDetailsDef()).then(function (data) {
 
                             if (data == null || data.length === 0) {
+                                hasDICOM = '0';//ACAS uses this variable
                                 return $.Deferred().resolve(null).promise();
                             }
 
@@ -744,6 +745,7 @@
                                 }
                                 tbody.append(series_E);
                             }
+                            hasDICOM = '1';//ACAS uses this variable
                             return $.Deferred().resolve(studies_E).promise();
                         });
                 }
