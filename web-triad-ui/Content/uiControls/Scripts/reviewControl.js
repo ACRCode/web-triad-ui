@@ -18,6 +18,7 @@
                 onErrorEvent: function () {
                     console.log("On error event handler was not added");
                 },
+                callback: function () { },//ACAS uses it
                 securityToken: null,
                 isImagesViewingAllowed: false,
                 isImagesRemovingAllowed: false
@@ -636,6 +637,7 @@
 
                             if (data == null || data.length === 0) {
                                 hasDICOM = '0';//ACAS uses this variable
+                                if ($.isFunction(self.options.callback)) self.options.callback();//ACAS uses it
                                 return $.Deferred().resolve(null).promise();
                             }
 
@@ -746,6 +748,7 @@
                                 tbody.append(series_E);
                             }
                             hasDICOM = '1';//ACAS uses this variable
+                            if ($.isFunction(self.options.callback)) self.options.callback();//ACAS uses it
                             return $.Deferred().resolve(studies_E).promise();
                         });
                 }
